@@ -2,48 +2,92 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Extraction Couleurs - K-Means (BodyPix en Option) + Reload</title>
+  <title>MODACOLORPALOGUE - K-Means + BodyPix + Reload + Historique + Effacer + Sauv. PDF</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      display: flex;
+      margin: 0;
+      display: flex;         /* on va disposer 3 colonnes : gauche, centre, droite */
       flex-direction: row;
       text-transform: uppercase;
-      color: #e91e63; 
+      color: #e91e63;
       font-weight: 300;
     }
-    h1, h2, h3, button, label {
-      margin: 0; 
+
+    /* --- Colonne de gauche : desc-panel (300px, filet à droite) --- */
+    .desc-panel {
+      width: 300px;
+      border-right: 2px solid #ccc;
+      padding: 15px;
+    }
+    /* Titre “Mode d’utilisation”, aligné comme “Historique” en taille */
+    .desc-panel h2 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+      text-transform: uppercase;
+      color: #e91e63;
+      font-weight: 300;
+    }
+    .desc-panel ul {
+      margin-left: 20px;
       padding: 0;
+      list-style-type: disc;
     }
-    .color-label {
-      color: #000; /* RVB en noir */
-      font-weight: 300;
+    .desc-panel li {
+      margin-bottom: 8px;
+      font-size: 12px;        /* on revient à une police plus lisible pour l’explication */
+      text-transform: none;   /* on retire le tout-majuscule pour le texte explicatif */
+      color: #333;
+      line-height: 1.4;
+    }
+    .desc-panel li strong {
+      color: #e91e63;         /* mettre en avant le titre du paramètre */
+    }
+    .desc-panel .example {
+      font-style: italic;
+      color: #555;
+    }
+
+    /* --- Colonne centrale : main-content (flex:1) --- */
+    .main-content {
+      flex: 1;
+      margin: 0 15px; /* un peu de marge sur les côtés */
+    }
+    /* Titre principal */
+    h1 {
+      margin-top: 15px;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    /* Sous-titre plus petit */
+    .subheading {
+      font-size: 14px; /* plus petit qu'un h2 */
+      text-align: center;
+      margin-bottom: 30px; /* On laisse un peu de place avant que desc/hist s’alignent */
       text-transform: uppercase;
     }
-    .main-content {
-      flex: 1; 
-      margin-right: 20px;
-    }
-    h1, h2 {
-      text-align: center; 
-      margin-bottom: 10px;
+
+    /* Loader + zone photos */
+    #loader {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
     }
     #photos {
-      display: flex; 
+      display: flex;
       flex-direction: column;
-      align-items: center; 
-      margin-top: 20px;
+      align-items: center;
+      margin-top: 10px;
     }
     .photo-block {
-      border: 1px solid #ccc; 
-      margin-bottom: 20px; 
-      padding: 10px; 
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      padding: 10px;
       border-radius: 8px;
-      width: 320px; 
-      display: flex; 
-      flex-direction: column; 
+      width: 320px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
     }
     .photo-block h3 {
@@ -52,56 +96,141 @@
       text-align: center;
     }
     .photo-image {
-      max-width: 300px; 
-      border-radius: 4px; 
+      max-width: 300px;
+      border-radius: 4px;
       margin-bottom: 10px;
     }
     .photo-palette {
-      display: flex; 
-      flex-wrap: wrap; 
-      justify-content: center; 
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       margin-bottom: 10px;
     }
     .color-container {
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin: 5px;
     }
     .color-swatch {
-      width: 60px; 
-      height: 60px; 
+      width: 60px;
+      height: 60px;
       border-radius: 4px;
     }
     .color-label {
-      margin-top: 5px; 
-      font-size: 12px; 
+      margin-top: 5px;
+      font-size: 12px;
       text-align: center;
+      color: #000;
+      font-weight: 300;
+      text-transform: uppercase;
     }
-    #loader {
-      display: none; 
-      text-align: center; 
-      margin-top: 15px;
-    }
+
+    /* --- Colonne de droite : history-panel (300px, filet à gauche) --- */
     .history-panel {
-      width: 300px; 
-      border-left: 2px solid #ccc; 
-      padding-left: 20px;
+      width: 300px;
+      border-left: 2px solid #ccc;
+      padding: 15px;
     }
     .history-panel h2 {
-      text-align: center; 
+      font-size: 14px;     /* aligné sur “Mode d’utilisation” */
       margin-bottom: 10px;
+      text-align: center;
+      text-transform: uppercase;
+      color: #e91e63;
+      font-weight: 300;
+    }
+    #historyContainer {
+      margin-top: 10px;
+    }
+    .history-item {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ccc; /* Trait de séparation */
+      padding-bottom: 5px;
+    }
+    .history-item h4 {
+      margin: 0;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #e91e63;
+      font-weight: 300;
+      margin-bottom: 5px;
+    }
+    .history-colors {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .history-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      margin: 2px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Zone principale (gauche) -->
-  <div class="main-content">
-    <h1>EXTRACTION DE COULEURS</h1>
-    <h2>K-MEANS (BODYPIX en option) + RELOAD</h2>
+  <!-- Colonne de gauche : desc-panel -->
+  <div class="desc-panel">
+    <!-- Titre “Mode d’utilisation” -->
+    <h2>MODE D’UTILISATION</h2>
+    <!-- Liste succincte + exemples -->
+    <ul>
+      <li>
+        <strong>Nombre de couleurs</strong> :
+        définit combien de couleurs finales sont affichées.
+        <div class="example">
+          Exemple : 3 pour un résultat plus général, 6 pour plus de nuances.
+        </div>
+      </li>
+      <li>
+        <strong>K clusters</strong> :
+        nombre de groupes dans l’algorithme K-means.
+        <div class="example">
+          Exemple : 3 groupes pour fusionner plus, 10 pour séparer au maximum.
+        </div>
+      </li>
+      <li>
+        <strong>Détection personne (BodyPix)</strong> :
+        si activé, isole la silhouette humaine.
+        <div class="example">
+          Exemple : pour un mannequin, on ignore le décor.
+        </div>
+      </li>
+      <li>
+        <strong>Pondération centre</strong> :
+        favorise la zone centrale de l’image.
+        <div class="example">
+          Exemple : le sujet est centré, le fond est moins pris en compte.
+        </div>
+      </li>
+      <li>
+        <strong>Échantillonnage</strong> :
+        lit 1 pixel sur X pour accélérer le calcul.
+        <div class="example">
+          Exemple : 1/4 est plus rapide qu’1/1, mais moins précis.
+        </div>
+      </li>
+      <li>
+        <strong>KmÉans runs</strong> :
+        relance K-means X fois pour un meilleur résultat.
+        <div class="example">
+          Exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
+        </div>
+      </li>
+    </ul>
+  </div>
 
-    <!-- Choix des paramètres -->
+  <!-- Colonne centrale : main-content -->
+  <div class="main-content">
+    <!-- Titre principal -->
+    <h1>MODACOLORPALOGUE</h1>
+    <!-- Sous-titre plus petit -->
+    <div class="subheading">
+      K-means + bodypix + reload + historique + effacer + sauv. pdf
+    </div>
+
+    <!-- Paramètres principaux (sélecteurs, checkboxes) -->
     <div style="text-align:center;">
       <label for="colorCount">NOMBRE DE COULEURS :</label>
       <select id="colorCount">
@@ -145,35 +274,43 @@
       </select>
     </div>
 
-    <!-- Input pour téléverser les images -->
+    <!-- Input (upload) -->
     <div style="text-align:center; margin-top:10px;">
       <input type="file" accept="image/*" id="imageInput" multiple>
     </div>
 
-    <!-- Bouton RELOAD -->
+    <!-- Boutons -->
     <div style="text-align:center; margin-top:10px;">
       <button id="reloadBtn">RELOAD</button>
+      <button id="effacerBtn" style="margin-left:10px;">EFFACER</button>
+      <button id="pdfBtn" style="margin-left:10px;">SAUV. PDF</button>
     </div>
 
     <div id="loader">CHARGEMENT / CALCUL EN COURS...</div>
     <div id="photos"></div>
   </div>
 
-  <!-- Panneau d'historique (droite) - facultatif, sans moodboard -->
+  <!-- Colonne de droite : history-panel -->
   <div class="history-panel">
     <h2>HISTORIQUE</h2>
-    <p>(Personnalisable si besoin)</p>
+    <div id="historyContainer"></div>
   </div>
 
-  <!-- Scripts TensorFlow.js + BodyPix -->
+  <!-- Scripts TF.js + BodyPix -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0"></script>
+
+  <!-- Script html2canvas + jsPDF pour la capture PDF -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
     let bodyPixNet = null;
 
     const imageInput = document.getElementById('imageInput');
     const reloadBtn = document.getElementById('reloadBtn');
+    const effacerBtn = document.getElementById('effacerBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
     const photosContainer = document.getElementById('photos');
     const loader = document.getElementById('loader');
 
@@ -184,7 +321,9 @@
     const sampleFactorSelect = document.getElementById('sampleFactor');
     const kmRunsSelect = document.getElementById('kmRuns');
 
-    // On va stocker ici la liste des images (nom + dataURL) pour pouvoir "reload" ensuite
+    const historyContainer = document.getElementById('historyContainer');
+
+    // On stocke la liste des images (nom + dataURL)
     const uploadedImages = [];
 
     // 1) Charger BodyPix au démarrage
@@ -194,33 +333,40 @@
       loader.style.display = 'none';
     });
 
-    // 2) Quand on sélectionne des images
+    // 2) Upload d'images
     imageInput.addEventListener('change', async function() {
       const files = [...this.files];
       if (files.length === 0) return;
 
       loader.style.display = 'block';
-
-      // Pour chaque fichier, on le lit, on stocke, on affiche
       for (let file of files) {
         await handleFile(file);
       }
-
       loader.style.display = 'none';
     });
 
-    // 3) Bouton RELOAD : on recalcule pour TOUTES les images
+    // 3) RELOAD
     reloadBtn.addEventListener('click', async function() {
       loader.style.display = 'block';
-
-      // On vide l'affichage
       photosContainer.innerHTML = '';
+      historyContainer.innerHTML = '';
 
-      // On ré-affiche chaque image, en commençant par la plus récente (donc on part de la fin)
+      // On repart de la fin (la plus récente en haut)
       for (let i = uploadedImages.length - 1; i >= 0; i--) {
         await createPhotoBlock(uploadedImages[i].name, uploadedImages[i].dataURL);
       }
+      loader.style.display = 'none';
+    });
 
+    // 4) EFFACER (le flux principal, pas l'historique)
+    effacerBtn.addEventListener('click', function() {
+      photosContainer.innerHTML = '';
+    });
+
+    // 5) SAUV. PDF
+    pdfBtn.addEventListener('click', async function() {
+      loader.style.display = 'block';
+      await saveHistoryAsPDF();
       loader.style.display = 'none';
     });
 
@@ -230,24 +376,17 @@
         const reader = new FileReader();
         reader.onload = async (e) => {
           const dataURL = e.target.result;
-          // On stocke l'image dans uploadedImages
           uploadedImages.push({ name: file.name, dataURL });
-
-          // On affiche immédiatement en haut (la dernière image)
-          // => On crée le bloc
-          // -> On l'insère en haut du container
+          // On affiche tout de suite en haut
           await createPhotoBlock(file.name, dataURL, true);
-
           resolve();
         };
         reader.readAsDataURL(file);
       });
     }
 
-    // Création + Calcul palette pour un bloc image
-    // note: "insertOnTop" = true si on vient d'uploader (pour l'ajouter direct en haut)
+    // Création + calcul palette pour l'image
     async function createPhotoBlock(fileName, dataURL, insertOnTop=false) {
-      // Créer le conteneur HTML
       const photoBlock = document.createElement('div');
       photoBlock.classList.add('photo-block');
 
@@ -265,29 +404,27 @@
       photoBlock.appendChild(imgElement);
       photoBlock.appendChild(paletteDiv);
 
-      // insérer en haut ou à la fin
       if (insertOnTop) {
-        // On insère ce bloc en haut
         if (photosContainer.firstChild) {
           photosContainer.insertBefore(photoBlock, photosContainer.firstChild);
         } else {
           photosContainer.appendChild(photoBlock);
         }
       } else {
-        // si on vient du reload, on append en bas OU on peut faire la boucle inversée
         photosContainer.appendChild(photoBlock);
       }
 
-      // Attendre chargement image
+      // Attendre chargement
       await new Promise((r) => {
         imgElement.onload = () => r();
       });
 
-      // On calcule la palette
-      const palette = await computePalette(imgElement);
-      // On affiche
+      // Calculer la palette
+      const topN = await computePalette(imgElement);
+
+      // Afficher la palette
       paletteDiv.innerHTML = '';
-      palette.forEach(([r, g, b]) => {
+      topN.forEach(([r, g, b]) => {
         const colorContainer = document.createElement('div');
         colorContainer.classList.add('color-container');
 
@@ -303,12 +440,15 @@
         colorContainer.appendChild(colorLabel);
         paletteDiv.appendChild(colorContainer);
       });
+
+      // Ajouter à l'historique
+      addToHistory(fileName, topN);
     }
 
-    // Calcule la palette pour 1 image (k-means sur le "sujet" ou sur toute l'image)
     async function computePalette(imgElement) {
       const w = imgElement.naturalWidth;
       const h = imgElement.naturalHeight;
+
       const N = parseInt(colorCountSelect.value, 10);
       const K = parseInt(clusterCountSelect.value, 10);
       const doSegment = personCheck.checked;
@@ -326,44 +466,32 @@
       const imageData = ctx.getImageData(0, 0, w, h).data;
 
       let allPixels = [];
-
       if (doSegment && bodyPixNet) {
-        // on segmente
         const segmentation = await bodyPixNet.segmentPerson(imgElement, {
           internalResolution: 'medium',
           segmentationThreshold: 0.7,
         });
-
-        // calculer la part de "1"
         let personCount = 0;
         for (let val of segmentation.data) {
           if (val === 1) personCount++;
         }
         const ratio = personCount / (w*h);
-
         if (ratio > 0.01) {
           allPixels = getPixelsMask(imageData, segmentation.data, w, h);
         } else {
-          // trop peu => on prend tout
           allPixels = getPixelsAll(imageData, w, h);
         }
       } else {
-        // on prend tout
         allPixels = getPixelsAll(imageData, w, h);
       }
 
-      // On échantillonne => pour plus de rapidité
+      // Echantillonnage
       const sampled = [];
       for (let i = 0; i < allPixels.length; i += sFactor) {
         sampled.push(allPixels[i]);
       }
 
-      // Si on fait la pondération centre, on convertit la liste en "pixel + weight"
-      // plus simple: stocker chaque pixel X fois. 
-      // => Cela peut exploser la taille. 
-      // => Ou faire un k-means modifié ? 
-      // On va faire la solution "naïve" : duplicater le pixel "weight" fois. 
-      // (on va estimer le weight de 0..3, par ex.)
+      // Pondération centre (non implémentée)
       let finalData = sampled;
       if (doCenter) {
         finalData = applyCenterWeight(sampled, w, h);
@@ -372,13 +500,58 @@
       // K-means
       const clusters = kmeansPlus(finalData, K, runs, 20);
 
-      // On prend les N plus gros clusters
+      // On prend les N plus gros
       clusters.sort((a, b) => b.points.length - a.points.length);
       const topN = clusters.slice(0, N).map(c => c.center);
 
       return topN;
     }
 
+    function addToHistory(fileName, palette) {
+      const itemDiv = document.createElement('div');
+      itemDiv.classList.add('history-item');
+
+      const title = document.createElement('h4');
+      title.textContent = fileName;
+      itemDiv.appendChild(title);
+
+      const colorsDiv = document.createElement('div');
+      colorsDiv.classList.add('history-colors');
+
+      palette.forEach(([r, g, b]) => {
+        const cBox = document.createElement('div');
+        cBox.classList.add('history-color');
+        cBox.style.backgroundColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+        colorsDiv.appendChild(cBox);
+      });
+
+      itemDiv.appendChild(colorsDiv);
+
+      // Insérer en haut
+      if (historyContainer.firstChild) {
+        historyContainer.insertBefore(itemDiv, historyContainer.firstChild);
+      } else {
+        historyContainer.appendChild(itemDiv);
+      }
+    }
+
+    // Capture l'historique en PDF
+    async function saveHistoryAsPDF() {
+      const canvas = await html2canvas(historyContainer, {
+        scale: 2
+      });
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','px','a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const ratio = canvas.height / canvas.width;
+      const pdfHeight = pdfWidth * ratio;
+
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('historique.pdf');
+    }
+
+    // Fonctions k-means
     function getPixelsAll(imgData, w, h) {
       const res = [];
       for (let i = 0; i < imgData.length; i += 4) {
@@ -389,7 +562,6 @@
       }
       return res;
     }
-
     function getPixelsMask(imgData, maskData, w, h) {
       const res = [];
       for (let i = 0; i < imgData.length; i += 4) {
@@ -403,45 +575,14 @@
       }
       return res;
     }
-
-    // Pondération centre "naïve" : on duplique plus ou moins le pixel selon la distance
-    // => dist au centre => weight in [0..3], arrondi => on push pixel "weight" fois
     function applyCenterWeight(pixels, w, h) {
-      const cx = w/2, cy = h/2;
-      const maxDist = Math.sqrt(cx*cx + cy*cy);
-      // On suppose qu'on a un champ ._x, ._y en plus => il faudrait l'avoir... 
-      // Mais on n'a pas conservé x,y dans "pixels". 
-      // => On fait un hack: On keep an index property in getPixelsAll => not as is. 
-      // OU on ne peut pas vraiment si on ne stocke pas x,y.
-      // => solution simple: on ignore pondération ou on recode la boucle. 
-      // => On va facker x,y ( see comment below).
-
-      // On va recréer la liste "weighted" en recalc x,y
-      const weighted = [];
-      const rowLen = Math.floor(Math.sqrt(pixels.length)); 
-      // c'est un "faux" guess, pas rigoureux, 
-      // Mieux vaudrait stocker x,y lors de getPixelsAll...
-
-      // Pour un code vraiment correct, on stockerait (r,g,b,x,y).
-      // Ici on fait un "approx" : dist = 0.5 ?
-
-      // => On va ignorer la pondération centre (just to illustrate).
-      // => OU on fait un ratio aléatoire ?
-
-      // Simplifions, on fait un "poids" = 1 => pondération centre inop. 
-      // Car sans x,y, c'est inapplicable. 
-      // Si vous voulez VRAIMENT, vous devez stocker x,y dans getPixelsAll().
-
+      // Non implémenté
       return pixels;
     }
-
-    // ---- K-means amélioré (kmeans++ + multi-run) ----
     function kmeansPlus(data, k, runs=3, maxIter=20) {
       if (data.length === 0 || k < 1) return [];
-
       let bestClusters = [];
       let bestScore = Infinity;
-
       for (let run = 0; run < runs; run++) {
         let centers = initKmeansPlus(data, k);
         const { clusters, sse } = runKmeans(data, centers, maxIter);
@@ -452,25 +593,22 @@
       }
       return bestClusters;
     }
-
     function initKmeansPlus(data, k) {
-      // pick first center random
       const centers = [];
       let randIndex = Math.floor(Math.random() * data.length);
       centers.push([...data[randIndex]]);
-
       while (centers.length < k) {
         let dists = data.map((p) => {
-          let minD = distanceSq(p, centers[0]);
+          let minD = distanceSq3(p, centers[0]);
           for (let c = 1; c < centers.length; c++) {
-            const dd = distanceSq(p, centers[c]);
+            const dd = distanceSq3(p, centers[c]);
             if (dd < minD) minD = dd;
           }
           return minD;
         });
         let sumDist = dists.reduce((a,c)=>a+c,0);
         let r = Math.random()*sumDist;
-        let idx = 0;
+        let idx=0;
         for (let i=0; i<dists.length; i++){
           r -= dists[i];
           if (r<=0) { idx=i; break;}
@@ -479,65 +617,65 @@
       }
       return centers;
     }
-
     function runKmeans(data, initCenters, maxIter=20) {
       const k = initCenters.length;
-      let centers = initCenters.map(c=>[...c]);
+      let centers = initCenters.map(c => [c[0], c[1], c[2]]);
       let assigns = new Array(data.length).fill(-1);
 
-      let changed = true;
+      let changed=true;
       let iter=0;
       while(changed && iter<maxIter){
         changed=false;
         iter++;
         // assign
-        for(let i=0;i<data.length;i++){
-          const px=data[i];
+        for (let i=0; i<data.length; i++){
           let best=0;
-          let bestDist=distanceSq(px, centers[0]);
-          for(let c=1;c<k;c++){
-            const dist=distanceSq(px,centers[c]);
+          let bestDist=distanceSq3(data[i], centers[0]);
+          for (let c=1; c<k; c++){
+            let dist=distanceSq3(data[i], centers[c]);
             if(dist<bestDist){bestDist=dist;best=c;}
           }
-          if(assigns[i]!==best){assigns[i]=best;changed=true;}
+          if(assigns[i]!==best){
+            assigns[i]=best;
+            changed=true;
+          }
         }
         // recalc
-        const sums=new Array(k).fill(null).map(()=>[0,0,0]);
-        const counts=new Array(k).fill(0);
-        for(let i=0;i<data.length;i++){
+        const sums = new Array(k).fill(null).map(()=>[0,0,0]);
+        const counts= new Array(k).fill(0);
+        for (let i=0; i<data.length; i++){
           const c=assigns[i];
-          sums[c][0]+=data[i][0];
-          sums[c][1]+=data[i][1];
-          sums[c][2]+=data[i][2];
+          sums[c][0]+= data[i][0];
+          sums[c][1]+= data[i][1];
+          sums[c][2]+= data[i][2];
           counts[c]++;
         }
-        for(let c=0;c<k;c++){
+        for (let c=0; c<k; c++){
           if(counts[c]>0){
-            centers[c][0]=sums[c][0]/counts[c];
-            centers[c][1]=sums[c][1]/counts[c];
-            centers[c][2]=sums[c][2]/counts[c];
+            centers[c][0] = sums[c][0]/counts[c];
+            centers[c][1] = sums[c][1]/counts[c];
+            centers[c][2] = sums[c][2]/counts[c];
           }
         }
       }
-      // sse + clusters
       let sse=0;
       const clusterArray=[];
-      for(let c=0;c<k;c++){
-        clusterArray.push({ center: centers[c], points:[]});
+      for (let c=0;c<k;c++){
+        clusterArray.push({ center:[centers[c][0], centers[c][1], centers[c][2]], points:[] });
       }
-      for(let i=0;i<data.length;i++){
+      for (let i=0; i<data.length; i++){
         const c=assigns[i];
-        sse+=distanceSq(data[i],centers[c]);
+        const dist=distanceSq3(data[i], centers[c]);
+        sse+=dist;
         clusterArray[c].points.push(data[i]);
       }
-      return {clusters: clusterArray, sse};
+      return { clusters: clusterArray, sse };
     }
-
-    function distanceSq(a,b){
-      const dx=a[0]-b[0];
-      const dy=a[1]-b[1];
-      const dz=a[2]-b[2];
-      return dx*dx+dy*dy+dz*dz;
+    function distanceSq3(px, ctr) {
+      const dx = px[0] - ctr[0];
+      const dy = px[1] - ctr[1];
+      const dz = px[2] - ctr[2];
+      return dx*dx + dy*dy + dz*dz;
     }
   </script>
 </body>
