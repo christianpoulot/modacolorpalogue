@@ -4,28 +4,27 @@
   <meta charset="UTF-8">
   <title>MODACOLORPALOGUE - K-Means + BodyPix + Reload + Historique + Effacer + Sauv. PDF</title>
   <style>
+    /* TOUT EN LETTRES CAPITALES */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      display: flex;         /* on va disposer 3 colonnes : gauche, centre, droite */
+      display: flex;         /* 3 colonnes : gauche, centre, droite */
       flex-direction: row;
-      text-transform: uppercase;
       color: #e91e63;
       font-weight: 300;
+      text-transform: uppercase; 
     }
 
-    /* --- Colonne de gauche : desc-panel (300px, filet à droite) --- */
+    /* Colonne gauche : desc-panel (300px, filet à droite) */
     .desc-panel {
       width: 300px;
       border-right: 2px solid #ccc;
       padding: 15px;
     }
-    /* Titre “Mode d’utilisation”, aligné comme “Historique” en taille */
     .desc-panel h2 {
       font-size: 14px;
       margin-bottom: 10px;
       text-align: center;
-      text-transform: uppercase;
       color: #e91e63;
       font-weight: 300;
     }
@@ -36,39 +35,38 @@
     }
     .desc-panel li {
       margin-bottom: 8px;
-      font-size: 12px;        /* on revient à une police plus lisible pour l’explication */
-      text-transform: none;   /* on retire le tout-majuscule pour le texte explicatif */
+      font-size: 12px;
       color: #333;
       line-height: 1.4;
     }
     .desc-panel li strong {
-      color: #e91e63;         /* mettre en avant le titre du paramètre */
+      color: #e91e63;
     }
     .desc-panel .example {
       font-style: italic;
       color: #555;
     }
+    hr {
+      border-top:1px solid #ccc; 
+      margin:15px 0;
+    }
 
-    /* --- Colonne centrale : main-content (flex:1) --- */
+    /* Colonne centrale : main-content (flex:1) */
     .main-content {
       flex: 1;
-      margin: 0 15px; /* un peu de marge sur les côtés */
+      margin: 0 15px;
     }
-    /* Titre principal */
     h1 {
       margin-top: 15px;
       text-align: center;
       margin-bottom: 5px;
     }
-    /* Sous-titre plus petit */
     .subheading {
-      font-size: 14px; /* plus petit qu'un h2 */
+      font-size: 14px;
       text-align: center;
-      margin-bottom: 30px; /* On laisse un peu de place avant que desc/hist s’alignent */
-      text-transform: uppercase;
+      margin-bottom: 30px;
     }
 
-    /* Loader + zone photos */
     #loader {
       display: none;
       text-align: center;
@@ -80,12 +78,15 @@
       align-items: center;
       margin-top: 10px;
     }
+
+    /* Bloc image + cercle occupant toute la largeur */
     .photo-block {
       border: 1px solid #ccc;
       margin-bottom: 20px;
       padding: 10px;
       border-radius: 8px;
-      width: 320px;
+      width: 100%;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -95,63 +96,60 @@
       font-size: 16px;
       text-align: center;
     }
-    .photo-image {
-      max-width: 300px;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
-    .photo-palette {
+
+    .photo-content {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
       justify-content: center;
-      margin-bottom: 10px;
+      align-items: center;  /* centre vertical */
+      width: 100%;
+      box-sizing: border-box;
     }
-    .color-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 5px;
-    }
-    .color-swatch {
-      width: 60px;
-      height: 60px;
+    .photo-image {
+      flex: 0 0 auto;
+      max-width: 45%;
       border-radius: 4px;
+      margin-right: 15px;
     }
-    .color-label {
-      margin-top: 5px;
-      font-size: 12px;
-      text-align: center;
-      color: #000;
-      font-weight: 300;
-      text-transform: uppercase;
+    .color-wheel-canvas {
+      flex: 1; 
+      background-color: #fff;
     }
 
-    /* --- Colonne de droite : history-panel (300px, filet à gauche) --- */
+    /* Colonne de droite : history-panel (300px, filet à gauche) */
     .history-panel {
       width: 300px;
       border-left: 2px solid #ccc;
       padding: 15px;
     }
+    /* 1) Titre = “HISTORIQUE” en h2, 2) Sur la ligne suivante “SURVOLEZ POUR LA VALEUR RVB” */
     .history-panel h2 {
-      font-size: 14px;     /* aligné sur “Mode d’utilisation” */
-      margin-bottom: 10px;
+      font-size: 14px;
+      margin: 0;
+      margin-bottom: 5px;
       text-align: center;
-      text-transform: uppercase;
       color: #e91e63;
       font-weight: 300;
     }
+    .history-panel .hover-instructions {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 300;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
     #historyContainer {
       margin-top: 10px;
     }
     .history-item {
       margin-bottom: 15px;
-      border-bottom: 1px solid #ccc; /* Trait de séparation */
+      border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
     }
     .history-item h4 {
       margin: 0;
       font-size: 12px;
-      text-transform: uppercase;
       color: #e91e63;
       font-weight: 300;
       margin-bottom: 5px;
@@ -170,81 +168,89 @@
 </head>
 <body>
 
-  <!-- Colonne de gauche : desc-panel -->
+  <!-- Colonne gauche : desc-panel -->
   <div class="desc-panel">
-    <!-- Titre “Mode d’utilisation” -->
-    <h2>MODE D’UTILISATION</h2>
-    <!-- Liste succincte + exemples -->
+    <h2>MODE D’EMPLOI</h2>
     <ul>
       <li>
         <strong>Nombre de couleurs</strong> :
         définit combien de couleurs finales sont affichées.
         <div class="example">
-          Exemple : 3 pour un résultat plus général, 6 pour plus de nuances.
+          exemple : 3 pour un résultat plus général, 10 pour de nombreuses nuances.
         </div>
       </li>
       <li>
-        <strong>K clusters</strong> :
-        nombre de groupes dans l’algorithme K-means.
+        <strong>k clusters</strong> :
+        nombre de groupes dans l’algorithme k-means.
         <div class="example">
-          Exemple : 3 groupes pour fusionner plus, 10 pour séparer au maximum.
+          exemple : 3 pour fusionner plus, 10 pour séparer au maximum.
         </div>
       </li>
       <li>
-        <strong>Détection personne (BodyPix)</strong> :
-        si activé, isole la silhouette humaine.
+        <strong>dÉtection personne (bodypix)</strong> :
+        si activÉ, isole la silhouette humaine.
         <div class="example">
-          Exemple : pour un mannequin, on ignore le décor.
+          exemple : pour un mannequin, on ignore le décor.
         </div>
       </li>
       <li>
-        <strong>Pondération centre</strong> :
+        <strong>pondÉration centre</strong> :
         favorise la zone centrale de l’image.
         <div class="example">
-          Exemple : le sujet est centré, le fond est moins pris en compte.
+          exemple : le sujet est centrÉ, le fond est moins pris en compte.
         </div>
       </li>
       <li>
         <strong>Échantillonnage</strong> :
-        lit 1 pixel sur X pour accélérer le calcul.
+        lit 1 pixel sur x pour accélÉrer le calcul.
         <div class="example">
-          Exemple : 1/4 est plus rapide qu’1/1, mais moins précis.
+          exemple : 1/4 plus rapide qu’1/1, mais moins précis.
         </div>
       </li>
       <li>
-        <strong>KmÉans runs</strong> :
-        relance K-means X fois pour un meilleur résultat.
+        <strong>kmÉans runs</strong> :
+        relance k-means x fois pour un meilleur résultat.
         <div class="example">
-          Exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
+          exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
         </div>
       </li>
     </ul>
+    <hr>
+    <div style="text-align:center;">
+      <button onclick="window.open('http://www.lemodalogue.com','_blank');">
+        RETOUR BLOG
+      </button>
+    </div>
   </div>
 
   <!-- Colonne centrale : main-content -->
   <div class="main-content">
-    <!-- Titre principal -->
     <h1>MODACOLORPALOGUE</h1>
-    <!-- Sous-titre plus petit -->
     <div class="subheading">
       K-means + bodypix + reload + historique + effacer + sauv. pdf
     </div>
 
-    <!-- Paramètres principaux (sélecteurs, checkboxes) -->
+    <!-- Paramètres (sélecteurs, checkboxes) -->
     <div style="text-align:center;">
       <label for="colorCount">NOMBRE DE COULEURS :</label>
+      <!-- Par défaut => 3 -->
       <select id="colorCount">
-        <option value="3">3</option>
+        <option value="3" selected>3</option>
         <option value="4">4</option>
-        <option value="5" selected>5</option>
+        <option value="5">5</option>
         <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
       </select>
 
       <label for="clusterCount" style="margin-left:10px;">K CLUSTERS :</label>
+      <!-- Par défaut => 5 -->
       <select id="clusterCount">
         <option value="3">3</option>
-        <option value="5">5</option>
-        <option value="8" selected>8</option>
+        <option value="5" selected>5</option>
+        <option value="8">8</option>
         <option value="10">10</option>
       </select>
     </div>
@@ -293,6 +299,8 @@
   <!-- Colonne de droite : history-panel -->
   <div class="history-panel">
     <h2>HISTORIQUE</h2>
+    <div class="hover-instructions">SURVOLEZ POUR LA VALEUR RVB</div>
+
     <div id="historyContainer"></div>
   </div>
 
@@ -300,7 +308,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0"></script>
 
-  <!-- Script html2canvas + jsPDF pour la capture PDF -->
+  <!-- Script html2canvas + jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -322,22 +330,19 @@
     const kmRunsSelect = document.getElementById('kmRuns');
 
     const historyContainer = document.getElementById('historyContainer');
-
-    // On stocke la liste des images (nom + dataURL)
     const uploadedImages = [];
 
-    // 1) Charger BodyPix au démarrage
+    // 1) Charger BodyPix
     window.addEventListener('DOMContentLoaded', async () => {
       loader.style.display = 'block';
       bodyPixNet = await bodyPix.load();
       loader.style.display = 'none';
     });
 
-    // 2) Upload d'images
+    // 2) Upload
     imageInput.addEventListener('change', async function() {
       const files = [...this.files];
       if (files.length === 0) return;
-
       loader.style.display = 'block';
       for (let file of files) {
         await handleFile(file);
@@ -351,14 +356,13 @@
       photosContainer.innerHTML = '';
       historyContainer.innerHTML = '';
 
-      // On repart de la fin (la plus récente en haut)
       for (let i = uploadedImages.length - 1; i >= 0; i--) {
         await createPhotoBlock(uploadedImages[i].name, uploadedImages[i].dataURL);
       }
       loader.style.display = 'none';
     });
 
-    // 4) EFFACER (le flux principal, pas l'historique)
+    // 4) EFFACER
     effacerBtn.addEventListener('click', function() {
       photosContainer.innerHTML = '';
     });
@@ -370,14 +374,12 @@
       loader.style.display = 'none';
     });
 
-    // Lecture d'un fichier
     async function handleFile(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async (e) => {
           const dataURL = e.target.result;
           uploadedImages.push({ name: file.name, dataURL });
-          // On affiche tout de suite en haut
           await createPhotoBlock(file.name, dataURL, true);
           resolve();
         };
@@ -385,24 +387,29 @@
       });
     }
 
-    // Création + calcul palette pour l'image
     async function createPhotoBlock(fileName, dataURL, insertOnTop=false) {
       const photoBlock = document.createElement('div');
       photoBlock.classList.add('photo-block');
 
       const title = document.createElement('h3');
       title.textContent = fileName;
+      photoBlock.appendChild(title);
+
+      const contentDiv = document.createElement('div');
+      contentDiv.classList.add('photo-content');
 
       const imgElement = document.createElement('img');
       imgElement.classList.add('photo-image');
       imgElement.src = dataURL;
 
-      const paletteDiv = document.createElement('div');
-      paletteDiv.classList.add('photo-palette');
+      const circleCanvas = document.createElement('canvas');
+      circleCanvas.classList.add('color-wheel-canvas');
+      circleCanvas.width = 400; 
+      circleCanvas.height = 400;
 
-      photoBlock.appendChild(title);
-      photoBlock.appendChild(imgElement);
-      photoBlock.appendChild(paletteDiv);
+      contentDiv.appendChild(imgElement);
+      contentDiv.appendChild(circleCanvas);
+      photoBlock.appendChild(contentDiv);
 
       if (insertOnTop) {
         if (photosContainer.firstChild) {
@@ -414,38 +421,20 @@
         photosContainer.appendChild(photoBlock);
       }
 
-      // Attendre chargement
-      await new Promise((r) => {
+      await new Promise(r => {
         imgElement.onload = () => r();
       });
 
-      // Calculer la palette
-      const topN = await computePalette(imgElement);
+      // palette + proportions
+      const {colorsWithProps} = await computePaletteWithProps(imgElement);
+      drawColorWheel(circleCanvas, colorsWithProps);
 
-      // Afficher la palette
-      paletteDiv.innerHTML = '';
-      topN.forEach(([r, g, b]) => {
-        const colorContainer = document.createElement('div');
-        colorContainer.classList.add('color-container');
-
-        const colorSwatch = document.createElement('div');
-        colorSwatch.classList.add('color-swatch');
-        colorSwatch.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-
-        const colorLabel = document.createElement('div');
-        colorLabel.classList.add('color-label');
-        colorLabel.textContent = `RVB(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-
-        colorContainer.appendChild(colorSwatch);
-        colorContainer.appendChild(colorLabel);
-        paletteDiv.appendChild(colorContainer);
-      });
-
-      // Ajouter à l'historique
-      addToHistory(fileName, topN);
+      // Ajout historique
+      const paletteRGB = colorsWithProps.map(c=> [c.r,c.g,c.b]);
+      addToHistory(fileName, paletteRGB);
     }
 
-    async function computePalette(imgElement) {
+    async function computePaletteWithProps(imgElement) {
       const w = imgElement.naturalWidth;
       const h = imgElement.naturalHeight;
 
@@ -456,13 +445,11 @@
       const sFactor = parseInt(sampleFactorSelect.value, 10);
       const runs = parseInt(kmRunsSelect.value, 10);
 
-      // Canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const ctx = tempCanvas.getContext('2d');
       ctx.drawImage(imgElement, 0, 0, w, h);
-
       const imageData = ctx.getImageData(0, 0, w, h).data;
 
       let allPixels = [];
@@ -491,22 +478,125 @@
         sampled.push(allPixels[i]);
       }
 
-      // Pondération centre (non implémentée)
       let finalData = sampled;
       if (doCenter) {
         finalData = applyCenterWeight(sampled, w, h);
       }
 
-      // K-means
       const clusters = kmeansPlus(finalData, K, runs, 20);
-
-      // On prend les N plus gros
       clusters.sort((a, b) => b.points.length - a.points.length);
-      const topN = clusters.slice(0, N).map(c => c.center);
+      const used = clusters.slice(0, N);
 
-      return topN;
+      let totalCount = 0;
+      used.forEach(c => totalCount += c.points.length);
+
+      const colorsWithProps = used.map(c => {
+        const [r,g,b] = c.center;
+        return {
+          r, g, b,
+          proportion: c.points.length / totalCount
+        };
+      });
+      return { colorsWithProps };
     }
 
+    function drawColorWheel(canvas, colorData) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0, canvas.width, canvas.height);
+
+      const cx = canvas.width/2;
+      const cy = canvas.height/2;
+      const radius = 120;
+      let startAngle = 0;
+
+      const labelPositions = [];
+
+      colorData.forEach(cd => {
+        const angleSpan = cd.proportion * 2*Math.PI;
+        const endAngle = startAngle + angleSpan;
+
+        // arc
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = `rgb(${cd.r}, ${cd.g}, ${cd.b})`;
+        ctx.fill();
+
+        const midAngle = (startAngle + endAngle)/2;
+        startAngle = endAngle;
+
+        // Trait
+        const lineStart = radius * 0.8;
+        const lineEnd = radius + 30; 
+        const sx = cx + lineStart*Math.cos(midAngle);
+        const sy = cy + lineStart*Math.sin(midAngle);
+        const ex = cx + lineEnd*Math.cos(midAngle);
+        const ey = cy + lineEnd*Math.sin(midAngle);
+
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.strokeStyle='#000';
+        ctx.lineWidth=1;
+        ctx.stroke();
+
+        // 3 lignes => "R xx", "V yy", "B zz"
+        const lines = [
+          `R ${Math.round(cd.r)}`,
+          `V ${Math.round(cd.g)}`,
+          `B ${Math.round(cd.b)}`
+        ];
+
+        ctx.font='8px Arial';
+        ctx.fillStyle='#000';
+        ctx.textAlign='center';
+
+        // labelDist => radius+60
+        const labelDist = radius + 60;
+        const lx = cx + labelDist * Math.cos(midAngle);
+        const ly = cy + labelDist * Math.sin(midAngle);
+
+        const lineHeight=10;
+        const totalH= lines.length* lineHeight; 
+
+        let finalPos= avoidCollision(lx, ly, labelPositions, totalH);
+
+        // On ancre la 1ère ligne
+        let textY= finalPos.y;
+        lines.forEach(line=>{
+          ctx.fillText(line, finalPos.x, textY);
+          textY+= lineHeight;
+        });
+
+        labelPositions.push({
+          x: finalPos.x,
+          y: finalPos.y,
+          w: 0,
+          h: totalH
+        });
+      });
+    }
+
+    function avoidCollision(x, y, existing, h) {
+      let safeY = y;
+      let foundCollision = true;
+      while (foundCollision) {
+        foundCollision = false;
+        for (let lb of existing) {
+          let dist = Math.sqrt((x - lb.x)**2 + (safeY - lb.y)**2);
+          if (dist < 20) {
+            foundCollision = true;
+            safeY += 5;
+            break;
+          }
+        }
+      }
+      return { x, y: safeY };
+    }
+
+    // Ajout historique
+    // => On ajoute un TITLE sur chaque .history-color, sans décimales
     function addToHistory(fileName, palette) {
       const itemDiv = document.createElement('div');
       itemDiv.classList.add('history-item');
@@ -518,16 +608,16 @@
       const colorsDiv = document.createElement('div');
       colorsDiv.classList.add('history-colors');
 
-      palette.forEach(([r, g, b]) => {
+      palette.forEach(([r,g,b]) => {
         const cBox = document.createElement('div');
         cBox.classList.add('history-color');
         cBox.style.backgroundColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+        cBox.title = `R ${Math.round(r)}\nV ${Math.round(g)}\nB ${Math.round(b)}`;
         colorsDiv.appendChild(cBox);
       });
 
       itemDiv.appendChild(colorsDiv);
 
-      // Insérer en haut
       if (historyContainer.firstChild) {
         historyContainer.insertBefore(itemDiv, historyContainer.firstChild);
       } else {
@@ -535,23 +625,7 @@
       }
     }
 
-    // Capture l'historique en PDF
-    async function saveHistoryAsPDF() {
-      const canvas = await html2canvas(historyContainer, {
-        scale: 2
-      });
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p','px','a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const ratio = canvas.height / canvas.width;
-      const pdfHeight = pdfWidth * ratio;
-
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('historique.pdf');
-    }
-
-    // Fonctions k-means
+    /* Fonctions k-means + PDF inchangées */
     function getPixelsAll(imgData, w, h) {
       const res = [];
       for (let i = 0; i < imgData.length; i += 4) {
@@ -565,7 +639,7 @@
     function getPixelsMask(imgData, maskData, w, h) {
       const res = [];
       for (let i = 0; i < imgData.length; i += 4) {
-        const idx = i / 4;
+        const idx = i/4;
         if (maskData[idx] === 1) {
           const r = imgData[i];
           const g = imgData[i+1];
@@ -576,7 +650,6 @@
       return res;
     }
     function applyCenterWeight(pixels, w, h) {
-      // Non implémenté
       return pixels;
     }
     function kmeansPlus(data, k, runs=3, maxIter=20) {
@@ -627,7 +700,6 @@
       while(changed && iter<maxIter){
         changed=false;
         iter++;
-        // assign
         for (let i=0; i<data.length; i++){
           let best=0;
           let bestDist=distanceSq3(data[i], centers[0]);
@@ -640,7 +712,6 @@
             changed=true;
           }
         }
-        // recalc
         const sums = new Array(k).fill(null).map(()=>[0,0,0]);
         const counts= new Array(k).fill(0);
         for (let i=0; i<data.length; i++){
@@ -672,10 +743,25 @@
       return { clusters: clusterArray, sse };
     }
     function distanceSq3(px, ctr) {
-      const dx = px[0] - ctr[0];
-      const dy = px[1] - ctr[1];
-      const dz = px[2] - ctr[2];
+      const dx = px[0]-ctr[0];
+      const dy = px[1]-ctr[1];
+      const dz = px[2]-ctr[2];
       return dx*dx + dy*dy + dz*dz;
+    }
+
+    // PDF
+    async function saveHistoryAsPDF() {
+      const canvas = await html2canvas(historyContainer, {
+        scale: 2
+      });
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','px','a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const ratio = canvas.height / canvas.width;
+      const pdfHeight = pdfWidth * ratio;
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('historique.pdf');
     }
   </script>
 </body>
