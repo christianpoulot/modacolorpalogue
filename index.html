@@ -101,7 +101,7 @@
       display: flex;
       flex-direction: row;
       justify-content: center;
-      align-items: center;  /* centre vertical */
+      align-items: center;  /* CENTRE VERTICAL */
       width: 100%;
       box-sizing: border-box;
     }
@@ -122,7 +122,6 @@
       border-left: 2px solid #ccc;
       padding: 15px;
     }
-    /* 1) Titre = “HISTORIQUE” en h2, 2) Sur la ligne suivante “SURVOLEZ POUR LA VALEUR RVB” */
     .history-panel h2 {
       font-size: 14px;
       margin: 0;
@@ -138,7 +137,6 @@
       color: #666;
       margin-bottom: 10px;
     }
-
     #historyContainer {
       margin-top: 10px;
     }
@@ -209,7 +207,7 @@
       </li>
       <li>
         <strong>kmÉans runs</strong> :
-        relance k-means x fois pour un meilleur résultat.
+        relance k-means x fois pour un meilleur rÉsultat.
         <div class="example">
           exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
         </div>
@@ -233,7 +231,6 @@
     <!-- Paramètres (sélecteurs, checkboxes) -->
     <div style="text-align:center;">
       <label for="colorCount">NOMBRE DE COULEURS :</label>
-      <!-- Par défaut => 3 -->
       <select id="colorCount">
         <option value="3" selected>3</option>
         <option value="4">4</option>
@@ -246,7 +243,6 @@
       </select>
 
       <label for="clusterCount" style="margin-left:10px;">K CLUSTERS :</label>
-      <!-- Par défaut => 5 -->
       <select id="clusterCount">
         <option value="3">3</option>
         <option value="5" selected>5</option>
@@ -261,6 +257,10 @@
 
       <input type="checkbox" id="centerCheck" style="margin-left:10px;">
       <label for="centerCheck">PONDÉRATION CENTRE</label>
+
+      <!-- 1) Nouveau bouton “SUPP. ARR-PLAN” -->
+      <input type="checkbox" id="bgRemoveCheck" style="margin-left:10px;">
+      <label for="bgRemoveCheck">SUPP. ARR-PLAN</label>
     </div>
 
     <div style="text-align:center; margin-top:10px;">
@@ -282,7 +282,9 @@
 
     <!-- Input (upload) -->
     <div style="text-align:center; margin-top:10px;">
-      <input type="file" accept="image/*" id="imageInput" multiple>
+      <!-- 2) Label en lettres capitales : “SELECT. FICHIERS” -->
+      <label for="imageInput" style="margin-right:8px;">SELECT. FICHIERS</label>
+      <input type="file" accept="image/*" id="imageInput" multiple style="text-transform:none;">
     </div>
 
     <!-- Boutons -->
@@ -300,7 +302,6 @@
   <div class="history-panel">
     <h2>HISTORIQUE</h2>
     <div class="hover-instructions">SURVOLEZ POUR LA VALEUR RVB</div>
-
     <div id="historyContainer"></div>
   </div>
 
@@ -329,17 +330,20 @@
     const sampleFactorSelect = document.getElementById('sampleFactor');
     const kmRunsSelect = document.getElementById('kmRuns');
 
+    // 1) Nouveau checkbox “SUPP. ARR-PLAN”
+    const bgRemoveCheck = document.getElementById('bgRemoveCheck');
+
     const historyContainer = document.getElementById('historyContainer');
     const uploadedImages = [];
 
-    // 1) Charger BodyPix
+    // Charger BodyPix au démarrage
     window.addEventListener('DOMContentLoaded', async () => {
       loader.style.display = 'block';
       bodyPixNet = await bodyPix.load();
       loader.style.display = 'none';
     });
 
-    // 2) Upload
+    // Upload
     imageInput.addEventListener('change', async function() {
       const files = [...this.files];
       if (files.length === 0) return;
@@ -350,7 +354,7 @@
       loader.style.display = 'none';
     });
 
-    // 3) RELOAD
+    // Reload
     reloadBtn.addEventListener('click', async function() {
       loader.style.display = 'block';
       photosContainer.innerHTML = '';
@@ -362,12 +366,12 @@
       loader.style.display = 'none';
     });
 
-    // 4) EFFACER
+    // Effacer flux
     effacerBtn.addEventListener('click', function() {
       photosContainer.innerHTML = '';
     });
 
-    // 5) SAUV. PDF
+    // PDF
     pdfBtn.addEventListener('click', async function() {
       loader.style.display = 'block';
       await saveHistoryAsPDF();
@@ -425,11 +429,11 @@
         imgElement.onload = () => r();
       });
 
-      // palette + proportions
+      // Récupère la palette + proportions
       const {colorsWithProps} = await computePaletteWithProps(imgElement);
       drawColorWheel(circleCanvas, colorsWithProps);
 
-      // Ajout historique
+      // Ajout dans l'historique
       const paletteRGB = colorsWithProps.map(c=> [c.r,c.g,c.b]);
       addToHistory(fileName, paletteRGB);
     }
@@ -442,9 +446,13 @@
       const K = parseInt(clusterCountSelect.value, 10);
       const doSegment = personCheck.checked;
       const doCenter = centerCheck.checked;
+      // 2) Vérif si “SUPP. ARR-PLAN” est coché
+      const doBgRemove = bgRemoveCheck.checked;
+
       const sFactor = parseInt(sampleFactorSelect.value, 10);
       const runs = parseInt(kmRunsSelect.value, 10);
 
+      // On récupère l'image data
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = w;
       tempCanvas.height = h;
@@ -453,6 +461,8 @@
       const imageData = ctx.getImageData(0, 0, w, h).data;
 
       let allPixels = [];
+
+      // 1) BodyPix silhouette ?
       if (doSegment && bodyPixNet) {
         const segmentation = await bodyPixNet.segmentPerson(imgElement, {
           internalResolution: 'medium',
@@ -472,9 +482,9 @@
         allPixels = getPixelsAll(imageData, w, h);
       }
 
-      // Echantillonnage
+      // 2) Echantillonnage
       const sampled = [];
-      for (let i = 0; i < allPixels.length; i += sFactor) {
+      for (let i=0; i<allPixels.length; i+= sFactor){
         sampled.push(allPixels[i]);
       }
 
@@ -483,56 +493,100 @@
         finalData = applyCenterWeight(sampled, w, h);
       }
 
+      // 3) Si “SUPP. ARR-PLAN” => on retire grosso modo le “fond”
+      //    => ex. on supprime pixels proches des bords (couleurs angles) = démo naïve
+      if (doBgRemove) {
+        finalData = removeBackgroundNaive(finalData, imageData, w, h);
+      }
+
+      // 4) K-means
       const clusters = kmeansPlus(finalData, K, runs, 20);
-      clusters.sort((a, b) => b.points.length - a.points.length);
-      const used = clusters.slice(0, N);
+      clusters.sort((a,b)=> b.points.length - a.points.length);
+      const used= clusters.slice(0, N);
 
-      let totalCount = 0;
-      used.forEach(c => totalCount += c.points.length);
+      let totalCount=0;
+      used.forEach(c=> totalCount+= c.points.length);
 
-      const colorsWithProps = used.map(c => {
-        const [r,g,b] = c.center;
+      const colorsWithProps= used.map(c=>{
+        const [r,g,b]= c.center;
         return {
           r, g, b,
-          proportion: c.points.length / totalCount
+          proportion: c.points.length/ totalCount
         };
       });
       return { colorsWithProps };
     }
 
+    // Ex. d’une “exclusion grossière” de l’arrière-plan
+    // On récupère la couleur du coin haut-gauche + coin haut-droit + coin bas-gauche + coin bas-droit
+    // On fait la moyenne, et on supprime tous les pixels trop proches de cette “couleur de fond”
+    // => DÉMO NAÏVE : la vraie solution exigerait un algo plus évolué
+    function removeBackgroundNaive(pixels, fullData, w, h) {
+      // On sample 4 coins => [r,g,b]
+      const cTL = getPixel(fullData, 0, 0, w);
+      const cTR = getPixel(fullData, w-1, 0, w);
+      const cBL = getPixel(fullData, 0, h-1, w);
+      const cBR = getPixel(fullData, w-1, h-1, w);
+
+      // Moyenne
+      const bgR = (cTL[0]+ cTR[0]+ cBL[0]+ cBR[0])/4;
+      const bgG = (cTL[1]+ cTR[1]+ cBL[1]+ cBR[1])/4;
+      const bgB = (cTL[2]+ cTR[2]+ cBL[2]+ cBR[2])/4;
+
+      // On retire pixels “trop proches” du fond => ex. dist < 60^2
+      const thresholdSq = 60*60; 
+      const result= [];
+      for(let p of pixels){
+        const dr= p[0]- bgR;
+        const dg= p[1]- bgG;
+        const db= p[2]- bgB;
+        const distSq= (dr*dr+ dg*dg+ db*db);
+        if(distSq> thresholdSq){
+          result.push(p);
+        }
+      }
+      return result;
+    }
+    // Récupère le pixel (r,g,b) aux coords (x,y)
+    function getPixel(data, x, y, w){
+      const idx= (y* w + x)*4;
+      return [data[idx], data[idx+1], data[idx+2]];
+    }
+
+    // K-means, etc. inchangés
     function drawColorWheel(canvas, colorData) {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0,0, canvas.width, canvas.height);
 
-      const cx = canvas.width/2;
-      const cy = canvas.height/2;
-      const radius = 120;
-      let startAngle = 0;
+      const cx= canvas.width/2;
+      const cy= canvas.height/2;
+      const radius= 120;
+      let startAngle=0;
 
-      const labelPositions = [];
+      const labelPositions=[];
 
-      colorData.forEach(cd => {
-        const angleSpan = cd.proportion * 2*Math.PI;
-        const endAngle = startAngle + angleSpan;
+      colorData.forEach(cd=>{
+        const angleSpan= cd.proportion* 2*Math.PI;
+        const endAngle= startAngle+ angleSpan;
 
         // arc
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.arc(cx, cy, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = `rgb(${cd.r}, ${cd.g}, ${cd.b})`;
+        ctx.fillStyle= `rgb(${cd.r}, ${cd.g}, ${cd.b})`;
         ctx.fill();
 
-        const midAngle = (startAngle + endAngle)/2;
-        startAngle = endAngle;
+        const midAngle= (startAngle+ endAngle)/2;
+        startAngle= endAngle;
 
-        // Trait
-        const lineStart = radius * 0.8;
-        const lineEnd = radius + 30; 
-        const sx = cx + lineStart*Math.cos(midAngle);
-        const sy = cy + lineStart*Math.sin(midAngle);
-        const ex = cx + lineEnd*Math.cos(midAngle);
-        const ey = cy + lineEnd*Math.sin(midAngle);
+        // trait
+        const lineStart= radius*0.8;
+        const lineEnd= radius+30; 
+        const sx= cx+ lineStart*Math.cos(midAngle);
+        const sy= cy+ lineStart*Math.sin(midAngle);
+        const ex= cx+ lineEnd*Math.cos(midAngle);
+        const ey= cy+ lineEnd*Math.sin(midAngle);
 
         ctx.beginPath();
         ctx.moveTo(sx, sy);
@@ -542,27 +596,25 @@
         ctx.stroke();
 
         // 3 lignes => "R xx", "V yy", "B zz"
-        const lines = [
+        const lines= [
           `R ${Math.round(cd.r)}`,
           `V ${Math.round(cd.g)}`,
           `B ${Math.round(cd.b)}`
         ];
 
-        ctx.font='8px Arial';
+        ctx.font= '8px Arial';
         ctx.fillStyle='#000';
         ctx.textAlign='center';
 
-        // labelDist => radius+60
-        const labelDist = radius + 60;
-        const lx = cx + labelDist * Math.cos(midAngle);
-        const ly = cy + labelDist * Math.sin(midAngle);
+        const labelDist= radius+60;
+        const lx= cx+ labelDist*Math.cos(midAngle);
+        const ly= cy+ labelDist*Math.sin(midAngle);
 
         const lineHeight=10;
-        const totalH= lines.length* lineHeight; 
+        const totalH= lines.length* lineHeight;
 
         let finalPos= avoidCollision(lx, ly, labelPositions, totalH);
 
-        // On ancre la 1ère ligne
         let textY= finalPos.y;
         lines.forEach(line=>{
           ctx.fillText(line, finalPos.x, textY);
@@ -577,17 +629,16 @@
         });
       });
     }
-
-    function avoidCollision(x, y, existing, h) {
-      let safeY = y;
-      let foundCollision = true;
-      while (foundCollision) {
-        foundCollision = false;
-        for (let lb of existing) {
-          let dist = Math.sqrt((x - lb.x)**2 + (safeY - lb.y)**2);
-          if (dist < 20) {
-            foundCollision = true;
-            safeY += 5;
+    function avoidCollision(x, y, existing, h){
+      let safeY= y;
+      let foundCollision= true;
+      while(foundCollision){
+        foundCollision= false;
+        for(let lb of existing){
+          let dist= Math.sqrt((x- lb.x)**2+ (safeY- lb.y)**2);
+          if(dist<20){
+            foundCollision= true;
+            safeY+=5;
             break;
           }
         }
@@ -595,172 +646,169 @@
       return { x, y: safeY };
     }
 
-    // Ajout historique
-    // => On ajoute un TITLE sur chaque .history-color, sans décimales
+    // Ajout historique => identique
     function addToHistory(fileName, palette) {
-      const itemDiv = document.createElement('div');
+      const itemDiv= document.createElement('div');
       itemDiv.classList.add('history-item');
 
-      const title = document.createElement('h4');
-      title.textContent = fileName;
+      const title= document.createElement('h4');
+      title.textContent= fileName;
       itemDiv.appendChild(title);
 
-      const colorsDiv = document.createElement('div');
+      const colorsDiv= document.createElement('div');
       colorsDiv.classList.add('history-colors');
 
-      palette.forEach(([r,g,b]) => {
-        const cBox = document.createElement('div');
+      palette.forEach(([r,g,b])=>{
+        const cBox= document.createElement('div');
         cBox.classList.add('history-color');
-        cBox.style.backgroundColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-        cBox.title = `R ${Math.round(r)}\nV ${Math.round(g)}\nB ${Math.round(b)}`;
+        cBox.style.backgroundColor= `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+        cBox.title= `R ${Math.round(r)}\nV ${Math.round(g)}\nB ${Math.round(b)}`;
         colorsDiv.appendChild(cBox);
       });
-
       itemDiv.appendChild(colorsDiv);
 
-      if (historyContainer.firstChild) {
+      if(historyContainer.firstChild){
         historyContainer.insertBefore(itemDiv, historyContainer.firstChild);
       } else {
         historyContainer.appendChild(itemDiv);
       }
     }
 
-    /* Fonctions k-means + PDF inchangées */
     function getPixelsAll(imgData, w, h) {
-      const res = [];
-      for (let i = 0; i < imgData.length; i += 4) {
-        const r = imgData[i];
-        const g = imgData[i+1];
-        const b = imgData[i+2];
-        res.push([r, g, b]);
+      const res=[];
+      for(let i=0; i<imgData.length; i+=4){
+        const r= imgData[i];
+        const g= imgData[i+1];
+        const b= imgData[i+2];
+        res.push([r,g,b]);
       }
       return res;
     }
     function getPixelsMask(imgData, maskData, w, h) {
-      const res = [];
-      for (let i = 0; i < imgData.length; i += 4) {
-        const idx = i/4;
-        if (maskData[idx] === 1) {
-          const r = imgData[i];
-          const g = imgData[i+1];
-          const b = imgData[i+2];
-          res.push([r, g, b]);
+      const res=[];
+      for(let i=0; i<imgData.length; i+=4){
+        const idx= i/4;
+        if(maskData[idx]===1){
+          const r= imgData[i];
+          const g= imgData[i+1];
+          const b= imgData[i+2];
+          res.push([r,g,b]);
         }
       }
       return res;
     }
-    function applyCenterWeight(pixels, w, h) {
+    function applyCenterWeight(pixels, w, h){
       return pixels;
     }
-    function kmeansPlus(data, k, runs=3, maxIter=20) {
-      if (data.length === 0 || k < 1) return [];
-      let bestClusters = [];
-      let bestScore = Infinity;
-      for (let run = 0; run < runs; run++) {
-        let centers = initKmeansPlus(data, k);
-        const { clusters, sse } = runKmeans(data, centers, maxIter);
-        if (sse < bestScore) {
-          bestScore = sse;
-          bestClusters = clusters;
+
+    // K-means inchangé
+    function kmeansPlus(data, k, runs=3, maxIter=20){
+      if(data.length===0|| k<1) return [];
+      let bestClusters=[];
+      let bestScore=Infinity;
+      for(let run=0; run<runs; run++){
+        let centers= initKmeansPlus(data,k);
+        const {clusters,sse}= runKmeans(data, centers, maxIter);
+        if(sse<bestScore){
+          bestScore=sse;
+          bestClusters= clusters;
         }
       }
       return bestClusters;
     }
-    function initKmeansPlus(data, k) {
-      const centers = [];
-      let randIndex = Math.floor(Math.random() * data.length);
+    function initKmeansPlus(data,k){
+      const centers=[];
+      let randIndex= Math.floor(Math.random()*data.length);
       centers.push([...data[randIndex]]);
-      while (centers.length < k) {
-        let dists = data.map((p) => {
-          let minD = distanceSq3(p, centers[0]);
-          for (let c = 1; c < centers.length; c++) {
-            const dd = distanceSq3(p, centers[c]);
-            if (dd < minD) minD = dd;
+      while(centers.length<k){
+        let dists= data.map(p=>{
+          let minD= distanceSq3(p,centers[0]);
+          for(let c=1;c<centers.length;c++){
+            const dd= distanceSq3(p,centers[c]);
+            if(dd<minD) minD= dd;
           }
           return minD;
         });
-        let sumDist = dists.reduce((a,c)=>a+c,0);
-        let r = Math.random()*sumDist;
+        let sumDist= dists.reduce((a,c)=>a+c,0);
+        let r= Math.random()*sumDist;
         let idx=0;
-        for (let i=0; i<dists.length; i++){
-          r -= dists[i];
-          if (r<=0) { idx=i; break;}
+        for(let i=0; i<dists.length;i++){
+          r-= dists[i];
+          if(r<=0){ idx=i; break;}
         }
         centers.push([...data[idx]]);
       }
       return centers;
     }
-    function runKmeans(data, initCenters, maxIter=20) {
-      const k = initCenters.length;
-      let centers = initCenters.map(c => [c[0], c[1], c[2]]);
-      let assigns = new Array(data.length).fill(-1);
+    function runKmeans(data, initCenters, maxIter=20){
+      const k= initCenters.length;
+      let centers= initCenters.map(c=> [c[0],c[1],c[2]]);
+      let assigns= new Array(data.length).fill(-1);
 
       let changed=true;
       let iter=0;
-      while(changed && iter<maxIter){
+      while(changed && iter< maxIter){
         changed=false;
         iter++;
-        for (let i=0; i<data.length; i++){
+        for(let i=0; i<data.length;i++){
           let best=0;
-          let bestDist=distanceSq3(data[i], centers[0]);
-          for (let c=1; c<k; c++){
-            let dist=distanceSq3(data[i], centers[c]);
-            if(dist<bestDist){bestDist=dist;best=c;}
+          let bestDist= distanceSq3(data[i], centers[0]);
+          for(let c=1;c<k;c++){
+            let dist= distanceSq3(data[i], centers[c]);
+            if(dist< bestDist){ bestDist= dist; best= c;}
           }
           if(assigns[i]!==best){
-            assigns[i]=best;
-            changed=true;
+            assigns[i]= best;
+            changed= true;
           }
         }
-        const sums = new Array(k).fill(null).map(()=>[0,0,0]);
+        const sums= new Array(k).fill(null).map(()=> [0,0,0]);
         const counts= new Array(k).fill(0);
-        for (let i=0; i<data.length; i++){
-          const c=assigns[i];
+        for(let i=0;i<data.length;i++){
+          const c= assigns[i];
           sums[c][0]+= data[i][0];
           sums[c][1]+= data[i][1];
           sums[c][2]+= data[i][2];
           counts[c]++;
         }
-        for (let c=0; c<k; c++){
+        for(let c=0;c<k;c++){
           if(counts[c]>0){
-            centers[c][0] = sums[c][0]/counts[c];
-            centers[c][1] = sums[c][1]/counts[c];
-            centers[c][2] = sums[c][2]/counts[c];
+            centers[c][0]= sums[c][0]/ counts[c];
+            centers[c][1]= sums[c][1]/ counts[c];
+            centers[c][2]= sums[c][2]/ counts[c];
           }
         }
       }
       let sse=0;
-      const clusterArray=[];
-      for (let c=0;c<k;c++){
-        clusterArray.push({ center:[centers[c][0], centers[c][1], centers[c][2]], points:[] });
+      const clusterArray= [];
+      for(let c=0;c<k;c++){
+        clusterArray.push({ center:[ centers[c][0], centers[c][1], centers[c][2]], points:[] });
       }
-      for (let i=0; i<data.length; i++){
-        const c=assigns[i];
-        const dist=distanceSq3(data[i], centers[c]);
-        sse+=dist;
+      for(let i=0; i<data.length; i++){
+        const c= assigns[i];
+        const dist= distanceSq3(data[i], centers[c]);
+        sse+= dist;
         clusterArray[c].points.push(data[i]);
       }
-      return { clusters: clusterArray, sse };
+      return {clusters: clusterArray, sse};
     }
-    function distanceSq3(px, ctr) {
-      const dx = px[0]-ctr[0];
-      const dy = px[1]-ctr[1];
-      const dz = px[2]-ctr[2];
-      return dx*dx + dy*dy + dz*dz;
+    function distanceSq3(px,ctr){
+      const dx= px[0]-ctr[0];
+      const dy= px[1]-ctr[1];
+      const dz= px[2]-ctr[2];
+      return dx*dx+ dy*dy+ dz*dz;
     }
 
     // PDF
-    async function saveHistoryAsPDF() {
-      const canvas = await html2canvas(historyContainer, {
-        scale: 2
-      });
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p','px','a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const ratio = canvas.height / canvas.width;
-      const pdfHeight = pdfWidth * ratio;
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    async function saveHistoryAsPDF(){
+      const canvas= await html2canvas(historyContainer, {scale:2});
+      const { jsPDF }= window.jspdf;
+      const pdf= new jsPDF('p','px','a4');
+      const pdfWidth= pdf.internal.pageSize.getWidth();
+      const ratio= canvas.height/ canvas.width;
+      const pdfHeight= pdfWidth* ratio;
+      const imgData= canvas.toDataURL('image/png');
+      pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
       pdf.save('historique.pdf');
     }
   </script>
