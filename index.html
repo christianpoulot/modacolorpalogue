@@ -4,213 +4,144 @@
   <meta charset="UTF-8">
   <title>MODACOLORPALOGUE - K-Means + BodyPix + Reload + Historique + Effacer + Sauv. PDF</title>
   <style>
-    /* TOUT EN LETTRES CAPITALES */
+    /* Lettres capitales, etc. */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      display: flex;         /* 3 colonnes : gauche, centre, droite */
+      display: flex; /* 3 colonnes : gauche, centre, droite */
       flex-direction: row;
       color: #e91e63;
       font-weight: 300;
-      text-transform: uppercase; 
+      text-transform: uppercase;
     }
-
-    /* Colonne gauche : desc-panel (300px, filet à droite) */
     .desc-panel {
-      width: 300px;
-      border-right: 2px solid #ccc;
-      padding: 15px;
+      width: 300px; border-right:2px solid #ccc; padding:15px;
     }
     .desc-panel h2 {
-      font-size: 14px;
-      margin-bottom: 10px;
-      text-align: center;
-      color: #e91e63;
-      font-weight: 300;
+      font-size:14px; margin-bottom:10px; text-align:center;
+      color:#e91e63; font-weight:300;
     }
     .desc-panel ul {
-      margin-left: 20px;
-      padding: 0;
-      list-style-type: disc;
+      margin-left:20px; padding:0; list-style-type:disc;
     }
     .desc-panel li {
-      margin-bottom: 8px;
-      font-size: 12px;
-      color: #333;
-      line-height: 1.4;
-    }
-    .desc-panel li strong {
-      color: #e91e63;
-    }
-    .desc-panel .example {
-      font-style: italic;
-      color: #555;
+      margin-bottom:8px; font-size:12px; color:#333; line-height:1.4;
     }
     hr {
-      border-top:1px solid #ccc; 
-      margin:15px 0;
+      border-top:1px solid #ccc; margin:15px 0;
     }
-
-    /* Colonne centrale : main-content (flex:1) */
     .main-content {
-      flex: 1;
-      margin: 0 15px;
+      flex:1; margin:0 15px;
     }
     h1 {
-      margin-top: 15px;
-      text-align: center;
-      margin-bottom: 5px;
+      margin-top:15px; text-align:center; margin-bottom:5px;
     }
     .subheading {
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 30px;
+      font-size:14px; text-align:center; margin-bottom:30px;
     }
-
     #loader {
-      display: none;
-      text-align: center;
-      margin-top: 15px;
+      display:none; text-align:center; margin-top:15px;
     }
     #photos {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10px;
+      display:flex; flex-direction:column; align-items:center; margin-top:10px;
     }
-
-    /* Bloc image + cercle occupant toute la largeur */
     .photo-block {
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
-      padding: 10px;
-      border-radius: 8px;
-      width: 100%;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      border:1px solid #ccc; margin-bottom:20px; padding:10px; border-radius:8px;
+      width:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; position:relative;
     }
     .photo-block h3 {
-      margin-bottom: 10px;
-      font-size: 16px;
-      text-align: center;
+      margin-bottom:10px; font-size:16px; text-align:center;
     }
-
     .photo-content {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;  /* CENTRE VERTICAL */
-      width: 100%;
-      box-sizing: border-box;
+      display:flex; flex-direction:row; justify-content:center; align-items:center;
+      width:100%; box-sizing:border-box; position:relative;
     }
     .photo-image {
-      flex: 0 0 auto;
-      max-width: 45%;
-      border-radius: 4px;
-      margin-right: 15px;
+      flex:0 0 auto; max-width:45%; border-radius:4px; margin-right:15px;
     }
     .color-wheel-canvas {
-      flex: 1; 
-      background-color: #fff;
+      flex:1; background-color:#fff;
     }
-
-    /* Colonne de droite : history-panel (300px, filet à gauche) */
+    .rect-sel-canvas {
+      position:absolute; left:0; top:0; border:none; pointer-events:none;
+    }
     .history-panel {
-      width: 300px;
-      border-left: 2px solid #ccc;
-      padding: 15px;
+      width:300px; border-left:2px solid #ccc; padding:15px;
     }
     .history-panel h2 {
-      font-size: 14px;
-      margin: 0;
-      margin-bottom: 5px;
-      text-align: center;
-      color: #e91e63;
-      font-weight: 300;
+      font-size:14px; margin:0; margin-bottom:5px; text-align:center; color:#e91e63; font-weight:300;
     }
-    .history-panel .hover-instructions {
-      text-align: center;
-      font-size: 12px;
-      font-weight: 300;
-      color: #666;
-      margin-bottom: 10px;
+    .hover-instructions {
+      text-align:center; font-size:12px; font-weight:300; color:#666; margin-bottom:10px;
     }
     #historyContainer {
-      margin-top: 10px;
+      margin-top:10px;
     }
     .history-item {
-      margin-bottom: 15px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
+      margin-bottom:15px; border-bottom:1px solid #ccc; padding-bottom:5px;
     }
     .history-item h4 {
-      margin: 0;
-      font-size: 12px;
-      color: #e91e63;
-      font-weight: 300;
-      margin-bottom: 5px;
+      margin:0; font-size:12px; color:#e91e63; font-weight:300; margin-bottom:5px;
     }
     .history-colors {
-      display: flex;
-      flex-wrap: wrap;
+      display:flex; flex-wrap:wrap;
     }
     .history-color {
-      width: 20px;
-      height: 20px;
-      border-radius: 3px;
-      margin: 2px;
+      width:20px; height:20px; border-radius:3px; margin:2px;
+    }
+
+    /* Ajout d'une animation blink pour le bouton */
+    @keyframes blink {
+      0% {opacity:1;}
+      50% {opacity:0;}
+      100% {opacity:1;}
+    }
+    .blinking {
+      animation: blink 1s infinite;
+    }
+
+    /* Petit spinner pour indiquer le calcul en cours */
+    .spinner {
+      margin: 0 auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #e91e63;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 
-  <!-- Colonne gauche : desc-panel -->
+  <!-- Colonne gauche -->
   <div class="desc-panel">
     <h2>MODE D’EMPLOI</h2>
     <ul>
-      <li>
-        <strong>Nombre de couleurs</strong> :
-        définit combien de couleurs finales sont affichées.
-        <div class="example">
-          exemple : 3 pour un résultat plus général, 10 pour de nombreuses nuances.
-        </div>
+      <li><strong>NOMBRE DE COULEURS</strong> : définit combien de couleurs finales sont affichées.<br>
+        exemple : 3 pour un résultat plus général, 10 pour de nombreuses nuances.
       </li>
-      <li>
-        <strong>k clusters</strong> :
-        nombre de groupes dans l’algorithme k-means.
-        <div class="example">
-          exemple : 3 pour fusionner plus, 10 pour séparer au maximum.
-        </div>
+      <li><strong>K CLUSTERS</strong> : nombre de groupes dans l’algorithme k-means.<br>
+        exemple : 3 pour fusionner plus, 10 pour séparer au maximum.
       </li>
-      <li>
-        <strong>dÉtection personne (bodypix)</strong> :
-        si activÉ, isole la silhouette humaine.
-        <div class="example">
-          exemple : pour un mannequin, on ignore le décor.
-        </div>
+      <li><strong>DÉTECTION PERSONNE (BODYPIX)</strong> : si activé, isole la silhouette humaine.<br>
+        exemple : pour un mannequin, on ignore le décor.
       </li>
-      <li>
-        <strong>pondÉration centre</strong> :
-        favorise la zone centrale de l’image.
-        <div class="example">
-          exemple : le sujet est centrÉ, le fond est moins pris en compte.
-        </div>
+      <li><strong>PONDÉRATION CENTRE</strong> : favorise la zone centrale de l’image.<br>
+        exemple : le sujet est centré, le fond est moins pris en compte.
       </li>
-      <li>
-        <strong>Échantillonnage</strong> :
-        lit 1 pixel sur x pour accélÉrer le calcul.
-        <div class="example">
-          exemple : 1/4 plus rapide qu’1/1, mais moins précis.
-        </div>
+      <li><strong>ÉCHANTILLONNAGE</strong> : lit 1 pixel sur x pour accélérer le calcul.<br>
+        exemple : 1/4 plus rapide qu’1/1, mais moins précis.
       </li>
-      <li>
-        <strong>kmÉans runs</strong> :
-        relance k-means x fois pour un meilleur rÉsultat.
-        <div class="example">
-          exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
-        </div>
+      <li><strong>KMÉANS RUNS</strong> : relance k-means x fois pour un meilleur résultat.<br>
+        exemple : 1 run = plus rapide, 3 ou 5 = plus stable.
       </li>
     </ul>
     <hr>
@@ -221,18 +152,17 @@
     </div>
   </div>
 
-  <!-- Colonne centrale : main-content -->
+  <!-- Colonne centrale -->
   <div class="main-content">
     <h1>MODACOLORPALOGUE</h1>
     <div class="subheading">
       K-means + bodypix + reload + historique + effacer + sauv. pdf
     </div>
 
-    <!-- Paramètres (sélecteurs, checkboxes) -->
     <div style="text-align:center;">
       <label for="colorCount">NOMBRE DE COULEURS :</label>
       <select id="colorCount">
-        <option value="3" selected>3</option>
+        <option value="3">3</option>
         <option value="4">4</option>
         <option value="5">5</option>
         <option value="6">6</option>
@@ -245,8 +175,8 @@
       <label for="clusterCount" style="margin-left:10px;">K CLUSTERS :</label>
       <select id="clusterCount">
         <option value="3">3</option>
-        <option value="5" selected>5</option>
-        <option value="8">8</option>
+        <option value="5">5</option>
+        <option value="8" selected>8</option>
         <option value="10">10</option>
       </select>
     </div>
@@ -258,9 +188,11 @@
       <input type="checkbox" id="centerCheck" style="margin-left:10px;">
       <label for="centerCheck">PONDÉRATION CENTRE</label>
 
-      <!-- 1) Nouveau bouton “SUPP. ARR-PLAN” -->
       <input type="checkbox" id="bgRemoveCheck" style="margin-left:10px;">
       <label for="bgRemoveCheck">SUPP. ARR-PLAN</label>
+
+      <input type="checkbox" id="rectSelCheck" style="margin-left:10px;">
+      <label for="rectSelCheck">RECT SEL</label>
     </div>
 
     <div style="text-align:center; margin-top:10px;">
@@ -273,150 +205,158 @@
       </select>
 
       <label for="kmRuns" style="margin-left:10px;">KMÉANS RUNS :</label>
+      <!-- par défaut => 5, évite cluster noir -->
       <select id="kmRuns">
         <option value="1">1</option>
-        <option value="3" selected>3</option>
-        <option value="5">5</option>
+        <option value="3">3</option>
+        <option value="5" selected>5</option>
       </select>
     </div>
 
-    <!-- Input (upload) -->
     <div style="text-align:center; margin-top:10px;">
-      <!-- 2) Label en lettres capitales : “SELECT. FICHIERS” -->
       <label for="imageInput" style="margin-right:8px;">SELECT. FICHIERS</label>
       <input type="file" accept="image/*" id="imageInput" multiple style="text-transform:none;">
     </div>
 
-    <!-- Boutons -->
     <div style="text-align:center; margin-top:10px;">
       <button id="reloadBtn">RELOAD</button>
       <button id="effacerBtn" style="margin-left:10px;">EFFACER</button>
       <button id="pdfBtn" style="margin-left:10px;">SAUV. PDF</button>
     </div>
 
-    <div id="loader">CHARGEMENT / CALCUL EN COURS...</div>
+    <div id="loader">CHARGEMENT / CALCUL EN COURS...
+      <div class="spinner"></div>
+    </div>
     <div id="photos"></div>
   </div>
 
-  <!-- Colonne de droite : history-panel -->
+  <!-- Colonne de droite -->
   <div class="history-panel">
     <h2>HISTORIQUE</h2>
     <div class="hover-instructions">SURVOLEZ POUR LA VALEUR RVB</div>
     <div id="historyContainer"></div>
   </div>
 
-  <!-- Scripts TF.js + BodyPix -->
+  <!-- TF.js + BodyPix -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0"></script>
 
-  <!-- Script html2canvas + jsPDF -->
+  <!-- html2canvas + jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
-    let bodyPixNet = null;
+    let bodyPixNet=null;
 
-    const imageInput = document.getElementById('imageInput');
-    const reloadBtn = document.getElementById('reloadBtn');
-    const effacerBtn = document.getElementById('effacerBtn');
-    const pdfBtn = document.getElementById('pdfBtn');
-    const photosContainer = document.getElementById('photos');
-    const loader = document.getElementById('loader');
+    const imageInput= document.getElementById('imageInput');
+    const reloadBtn= document.getElementById('reloadBtn');
+    const effacerBtn= document.getElementById('effacerBtn');
+    const pdfBtn= document.getElementById('pdfBtn');
+    const photosContainer= document.getElementById('photos');
+    const loader= document.getElementById('loader');
 
-    const colorCountSelect = document.getElementById('colorCount');
-    const clusterCountSelect = document.getElementById('clusterCount');
-    const personCheck = document.getElementById('personCheck');
-    const centerCheck = document.getElementById('centerCheck');
-    const sampleFactorSelect = document.getElementById('sampleFactor');
-    const kmRunsSelect = document.getElementById('kmRuns');
+    const colorCountSelect= document.getElementById('colorCount');
+    const clusterCountSelect= document.getElementById('clusterCount');
+    const personCheck= document.getElementById('personCheck');
+    const centerCheck= document.getElementById('centerCheck');
+    const bgRemoveCheck= document.getElementById('bgRemoveCheck');
+    const rectSelCheck= document.getElementById('rectSelCheck');
+    const sampleFactorSelect= document.getElementById('sampleFactor');
+    const kmRunsSelect= document.getElementById('kmRuns');
 
-    // 1) Nouveau checkbox “SUPP. ARR-PLAN”
-    const bgRemoveCheck = document.getElementById('bgRemoveCheck');
+    const historyContainer= document.getElementById('historyContainer');
+    const uploadedImages=[];
 
-    const historyContainer = document.getElementById('historyContainer');
-    const uploadedImages = [];
-
-    // Charger BodyPix au démarrage
-    window.addEventListener('DOMContentLoaded', async () => {
-      loader.style.display = 'block';
-      bodyPixNet = await bodyPix.load();
-      loader.style.display = 'none';
-    });
-
-    // Upload
-    imageInput.addEventListener('change', async function() {
-      const files = [...this.files];
-      if (files.length === 0) return;
-      loader.style.display = 'block';
-      for (let file of files) {
-        await handleFile(file);
+    // CHARGER BodyPix
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      try {
+        loader.style.display='block';
+        // Attendre un micro-délai pour permettre l'affichage du loader
+        await new Promise(r => setTimeout(r, 0));
+        bodyPixNet= await bodyPix.load();
+      } catch(e){
+        console.error("Erreur chargement BodyPix:", e);
+      } finally {
+        loader.style.display='none';
       }
-      loader.style.display = 'none';
     });
 
-    // Reload
-    reloadBtn.addEventListener('click', async function() {
-      loader.style.display = 'block';
-      photosContainer.innerHTML = '';
-      historyContainer.innerHTML = '';
+    // Sur input => creer un block
+    imageInput.addEventListener('change', async ()=>{
+      if(!imageInput.files.length) return;
+      loader.style.display='block';
+      // Attendre un micro-délai pour permettre l'affichage du loader
+      await new Promise(r => setTimeout(r, 0));
 
-      for (let i = uploadedImages.length - 1; i >= 0; i--) {
-        await createPhotoBlock(uploadedImages[i].name, uploadedImages[i].dataURL);
+      try {
+        const files= [...imageInput.files];
+        for(let file of files){
+          await handleFile(file);
+        }
+      } catch(e){
+        console.error("Erreur handleFile:", e);
+      } finally {
+        loader.style.display='none';
       }
-      loader.style.display = 'none';
     });
 
-    // Effacer flux
-    effacerBtn.addEventListener('click', function() {
-      photosContainer.innerHTML = '';
-    });
-
-    // PDF
-    pdfBtn.addEventListener('click', async function() {
-      loader.style.display = 'block';
-      await saveHistoryAsPDF();
-      loader.style.display = 'none';
-    });
-
-    async function handleFile(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const dataURL = e.target.result;
-          uploadedImages.push({ name: file.name, dataURL });
-          await createPhotoBlock(file.name, dataURL, true);
+    async function handleFile(file){
+      return new Promise((resolve,reject)=>{
+        const reader= new FileReader();
+        reader.onload= (e)=>{
+          const dataURL= e.target.result;
+          uploadedImages.push({ name:file.name, dataURL });
+          createPhotoBlock(file.name, dataURL, true);
           resolve();
         };
+        reader.onerror= (err)=> reject(err);
         reader.readAsDataURL(file);
       });
     }
 
-    async function createPhotoBlock(fileName, dataURL, insertOnTop=false) {
-      const photoBlock = document.createElement('div');
+    // Fonction => creer un bloc photo
+    function createPhotoBlock(fileName, dataURL, insertOnTop=false){
+      const photoBlock= document.createElement('div');
       photoBlock.classList.add('photo-block');
 
-      const title = document.createElement('h3');
-      title.textContent = fileName;
+      const title= document.createElement('h3');
+      title.textContent= fileName;
       photoBlock.appendChild(title);
 
-      const contentDiv = document.createElement('div');
+      const contentDiv= document.createElement('div');
       contentDiv.classList.add('photo-content');
 
-      const imgElement = document.createElement('img');
+      const imgElement= document.createElement('img');
       imgElement.classList.add('photo-image');
-      imgElement.src = dataURL;
+      imgElement.src= dataURL;
 
-      const circleCanvas = document.createElement('canvas');
+      const circleCanvas= document.createElement('canvas');
       circleCanvas.classList.add('color-wheel-canvas');
-      circleCanvas.width = 400; 
-      circleCanvas.height = 400;
+      circleCanvas.width=400; 
+      circleCanvas.height=400;
 
       contentDiv.appendChild(imgElement);
       contentDiv.appendChild(circleCanvas);
       photoBlock.appendChild(contentDiv);
 
-      if (insertOnTop) {
-        if (photosContainer.firstChild) {
+      // overlay rect
+      const rectSelCanvas= document.createElement('canvas');
+      rectSelCanvas.classList.add('rect-sel-canvas');
+      rectSelCanvas.style.pointerEvents='none';
+      rectSelCanvas.width=400; 
+      rectSelCanvas.height=300;
+      photoBlock.__rectSel= { x0:0,y0:0,x1:400,y1:300 };
+      contentDiv.appendChild(rectSelCanvas);
+
+      // bouton analyser
+      const analyzeBtn= document.createElement('button');
+      analyzeBtn.textContent='ANALYSER';
+      analyzeBtn.style.marginTop='8px';
+      photoBlock.appendChild(analyzeBtn);
+
+      // insertion
+      if(insertOnTop){
+        if(photosContainer.firstChild){
           photosContainer.insertBefore(photoBlock, photosContainer.firstChild);
         } else {
           photosContainer.appendChild(photoBlock);
@@ -425,229 +365,369 @@
         photosContainer.appendChild(photoBlock);
       }
 
-      await new Promise(r => {
-        imgElement.onload = () => r();
+      // Ajuster rectSel => load
+      imgElement.addEventListener('load', ()=>{
+        rectSelCanvas.width= imgElement.clientWidth;
+        rectSelCanvas.height= imgElement.clientHeight;
+        rectSelCanvas.style.left= imgElement.offsetLeft+'px';
+        rectSelCanvas.style.top= imgElement.offsetTop+'px';
+        photoBlock.__rectSel= { x0:0,y0:0,x1:imgElement.clientWidth,y1:imgElement.clientHeight };
       });
 
-      // Récupère la palette + proportions
-      const {colorsWithProps} = await computePaletteWithProps(imgElement);
-      drawColorWheel(circleCanvas, colorsWithProps);
+      // rect sel
+      let isSelecting=false;
+      let selX0=0, selY0=0, selX1=0, selY1=0;
 
-      // Ajout dans l'historique
-      const paletteRGB = colorsWithProps.map(c=> [c.r,c.g,c.b]);
-      addToHistory(fileName, paletteRGB);
+      rectSelCanvas.addEventListener('mousedown', e=>{
+        if(!rectSelCheck.checked) return;
+        isSelecting=true;
+        const r= rectSelCanvas.getBoundingClientRect();
+        selX0= e.clientX- r.left;
+        selY0= e.clientY- r.top;
+        selX1= selX0; selY1= selY0;
+      });
+      rectSelCanvas.addEventListener('mousemove', e=>{
+        if(!rectSelCheck.checked) return;
+        if(!isSelecting) return;
+        const r= rectSelCanvas.getBoundingClientRect();
+        selX1= e.clientX- r.left;
+        selY1= e.clientY- r.top;
+        drawSelectionRect(rectSelCanvas, selX0, selY0, selX1, selY1);
+      });
+      rectSelCanvas.addEventListener('mouseup', e=>{
+        if(!rectSelCheck.checked) return;
+        finishRectSel();
+      });
+      rectSelCanvas.addEventListener('mouseleave', e=>{
+        if(isSelecting){
+          finishRectSel();
+        }
+      });
+
+      function finishRectSel(){
+        isSelecting=false;
+        const x0= Math.min(selX0, selX1);
+        const y0= Math.min(selY0, selY1);
+        const x1= Math.max(selX0, selX1);
+        const y1= Math.max(selY0, selY1);
+        photoBlock.__rectSel= { x0,y0,x1,y1 };
+      }
+      function drawSelectionRect(cv,x0,y0,x1,y1){
+        const ctx= cv.getContext('2d');
+        ctx.clearRect(0,0, cv.width, cv.height);
+        ctx.beginPath();
+        ctx.strokeStyle='lime';
+        ctx.lineWidth=2;
+        ctx.rect(Math.min(x0,x1), Math.min(y0,y1), Math.abs(x1-x0), Math.abs(y1-y0));
+        ctx.stroke();
+      }
+      function updateRectSelCanvas(){
+        if(rectSelCheck.checked){
+          rectSelCanvas.style.pointerEvents='auto';
+        } else {
+          rectSelCanvas.style.pointerEvents='none';
+          rectSelCanvas.getContext('2d').clearRect(0,0, rectSelCanvas.width, rectSelCanvas.height);
+        }
+      }
+      rectSelCheck.addEventListener('change', updateRectSelCanvas);
+      updateRectSelCanvas();
+
+      // ONCLICK => doAnalysis
+      analyzeBtn.addEventListener('click', async ()=>{
+        analyzeBtn.classList.add('blinking'); 
+        loader.style.display='block';
+        // Attendre un micro-délai pour permettre l'affichage du loader
+        await new Promise(r => setTimeout(r, 0));
+
+        try {
+          await doAnalysis(photoBlock);
+        } catch(e){
+          console.error("Erreur doAnalysis:", e);
+        } finally {
+          loader.style.display='none';
+          analyzeBtn.classList.remove('blinking');
+        }
+      });
+
+      photoBlock.__imgElement= imgElement;
+      photoBlock.__circleCanvas= circleCanvas;
     }
 
-    async function computePaletteWithProps(imgElement) {
-      const w = imgElement.naturalWidth;
-      const h = imgElement.naturalHeight;
+    async function doAnalysis(photoBlock){
+      const imgElement= photoBlock.__imgElement;
+      const circleCanvas= photoBlock.__circleCanvas;
 
-      const N = parseInt(colorCountSelect.value, 10);
-      const K = parseInt(clusterCountSelect.value, 10);
-      const doSegment = personCheck.checked;
-      const doCenter = centerCheck.checked;
-      // 2) Vérif si “SUPP. ARR-PLAN” est coché
-      const doBgRemove = bgRemoveCheck.checked;
+      const { colorsWithProps }= await computePaletteWithProps(imgElement, photoBlock);
+      if(!colorsWithProps || colorsWithProps.length===0){
+        alert("Aucune couleur détectée ou zone trop réduite.\nEssayez d'agrandir la sélection ou de décocher certaines options.");
+        return;
+      }
+      drawColorWheel(circleCanvas, colorsWithProps);
 
-      const sFactor = parseInt(sampleFactorSelect.value, 10);
-      const runs = parseInt(kmRunsSelect.value, 10);
+      const paletteRGB= colorsWithProps.map(c=> [c.r,c.g,c.b]);
+      const blockTitle= photoBlock.querySelector('h3').textContent;
+      addToHistory(blockTitle, paletteRGB);
+    }
 
-      // On récupère l'image data
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = w;
-      tempCanvas.height = h;
-      const ctx = tempCanvas.getContext('2d');
-      ctx.drawImage(imgElement, 0, 0, w, h);
-      const imageData = ctx.getImageData(0, 0, w, h).data;
+    async function computePaletteWithProps(imgElement, photoBlock){
+      const w= imgElement.naturalWidth;
+      const h= imgElement.naturalHeight;
 
-      let allPixels = [];
+      const N= parseInt(colorCountSelect.value,10);
+      const K= parseInt(clusterCountSelect.value,10);
+      const doSegment= personCheck.checked;
+      const doCenter= centerCheck.checked;
+      let doBgRemove= bgRemoveCheck.checked;
+      const doRectSel= rectSelCheck.checked;
 
-      // 1) BodyPix silhouette ?
-      if (doSegment && bodyPixNet) {
-        const segmentation = await bodyPixNet.segmentPerson(imgElement, {
-          internalResolution: 'medium',
-          segmentationThreshold: 0.7,
+      const sFactor= parseInt(sampleFactorSelect.value,10);
+      const runs= parseInt(kmRunsSelect.value,10);
+
+      if(doRectSel) doBgRemove=false;
+
+      const tempCanvas= document.createElement('canvas');
+      tempCanvas.width= w; tempCanvas.height= h;
+      const ctx= tempCanvas.getContext('2d');
+      ctx.drawImage(imgElement,0,0,w,h);
+      const imageData= ctx.getImageData(0,0,w,h).data;
+
+      let allPixels=[];
+      if(doSegment && bodyPixNet){
+        const seg= await bodyPixNet.segmentPerson(imgElement,{
+          internalResolution:'medium', segmentationThreshold:0.7
         });
-        let personCount = 0;
-        for (let val of segmentation.data) {
-          if (val === 1) personCount++;
-        }
-        const ratio = personCount / (w*h);
-        if (ratio > 0.01) {
-          allPixels = getPixelsMask(imageData, segmentation.data, w, h);
+        let personCount=0;
+        for(let val of seg.data){ if(val===1) personCount++;}
+        const ratio= personCount/(w*h);
+        if(ratio>0.01){
+          allPixels= getPixelsMask(imageData, seg.data, w,h);
         } else {
-          allPixels = getPixelsAll(imageData, w, h);
+          allPixels= getPixelsAll(imageData,w,h);
         }
       } else {
-        allPixels = getPixelsAll(imageData, w, h);
+        allPixels= getPixelsAll(imageData,w,h);
       }
 
-      // 2) Echantillonnage
-      const sampled = [];
-      for (let i=0; i<allPixels.length; i+= sFactor){
+      const sampled=[];
+      for(let i=0; i< allPixels.length; i+= sFactor){
         sampled.push(allPixels[i]);
       }
 
-      let finalData = sampled;
-      if (doCenter) {
-        finalData = applyCenterWeight(sampled, w, h);
+      let finalData= sampled;
+      if(doCenter){
+        finalData= applyCenterWeight(sampled,w,h);
+      }
+      if(doBgRemove){
+        finalData= removeBackgroundAdvanced(finalData, imageData, w,h);
+      }
+      if(doRectSel && photoBlock && photoBlock.__rectSel){
+        const {x0,y0,x1,y1}= photoBlock.__rectSel;
+        finalData= applyRectSel(finalData, imageData, w,h, x0,y0,x1,y1);
       }
 
-      // 3) Si “SUPP. ARR-PLAN” => on retire grosso modo le “fond”
-      //    => ex. on supprime pixels proches des bords (couleurs angles) = démo naïve
-      if (doBgRemove) {
-        finalData = removeBackgroundNaive(finalData, imageData, w, h);
+      if(finalData.length<10){
+        return {colorsWithProps:[]};
       }
 
-      // 4) K-means
-      const clusters = kmeansPlus(finalData, K, runs, 20);
-      clusters.sort((a,b)=> b.points.length - a.points.length);
-      const used= clusters.slice(0, N);
+      const clusters= kmeansPlus(finalData, K, runs,20);
+      clusters.sort((a,b)=> b.points.length- a.points.length);
+      if(!clusters.length){
+        return {colorsWithProps:[]};
+      }
 
-      let totalCount=0;
+      const used= clusters.slice(0,N);
+      let totalCount=0; 
       used.forEach(c=> totalCount+= c.points.length);
+      if(totalCount<1){
+        return { colorsWithProps:[] };
+      }
 
       const colorsWithProps= used.map(c=>{
         const [r,g,b]= c.center;
-        return {
-          r, g, b,
-          proportion: c.points.length/ totalCount
-        };
+        return { r,g,b, proportion: c.points.length/ totalCount };
       });
       return { colorsWithProps };
     }
 
-    // Ex. d’une “exclusion grossière” de l’arrière-plan
-    // On récupère la couleur du coin haut-gauche + coin haut-droit + coin bas-gauche + coin bas-droit
-    // On fait la moyenne, et on supprime tous les pixels trop proches de cette “couleur de fond”
-    // => DÉMO NAÏVE : la vraie solution exigerait un algo plus évolué
-    function removeBackgroundNaive(pixels, fullData, w, h) {
-      // On sample 4 coins => [r,g,b]
-      const cTL = getPixel(fullData, 0, 0, w);
-      const cTR = getPixel(fullData, w-1, 0, w);
-      const cBL = getPixel(fullData, 0, h-1, w);
-      const cBR = getPixel(fullData, w-1, h-1, w);
+    function removeBackgroundAdvanced(pixels,fullData,w,h){
+      const borderPixels=[];
+      for(let x=0;x<w;x+=5){
+        borderPixels.push([
+          fullData[(0*w + x)*4], fullData[(0*w + x)*4+1], fullData[(0*w + x)*4+2]
+        ]);
+      }
+      for(let x=0;x<w;x+=5){
+        borderPixels.push([
+          fullData[((h-1)*w + x)*4], fullData[((h-1)*w + x)*4+1], fullData[((h-1)*w + x)*4+2]
+        ]);
+      }
+      for(let y=0;y<h;y+=5){
+        borderPixels.push([
+          fullData[(y*w+0)*4], fullData[(y*w+0)*4+1], fullData[(y*w+0)*4+2]
+        ]);
+      }
+      for(let y=0;y<h;y+=5){
+        borderPixels.push([
+          fullData[(y*w+(w-1))*4], fullData[(y*w+(w-1))*4+1], fullData[(y*w+(w-1))*4+2]
+        ]);
+      }
 
-      // Moyenne
-      const bgR = (cTL[0]+ cTR[0]+ cBL[0]+ cBR[0])/4;
-      const bgG = (cTL[1]+ cTR[1]+ cBL[1]+ cBR[1])/4;
-      const bgB = (cTL[2]+ cTR[2]+ cBL[2]+ cBR[2])/4;
+      const borderClusters= kmeansPlus(borderPixels,2,3,10);
+      borderClusters.sort((a,b)=> b.points.length-a.points.length);
+      const bgCenter= borderClusters[0].center;
 
-      // On retire pixels “trop proches” du fond => ex. dist < 60^2
-      const thresholdSq = 60*60; 
-      const result= [];
+      const thresholdSq= 50*50; 
+      const kept=[];
       for(let p of pixels){
-        const dr= p[0]- bgR;
-        const dg= p[1]- bgG;
-        const db= p[2]- bgB;
-        const distSq= (dr*dr+ dg*dg+ db*db);
-        if(distSq> thresholdSq){
-          result.push(p);
+        const dr= p[0]- bgCenter[0];
+        const dg= p[1]- bgCenter[1];
+        const db= p[2]- bgCenter[2];
+        const dist= dr*dr+ dg*dg+ db*db;
+        if(dist> thresholdSq){
+          kept.push(p);
         }
       }
-      return result;
+      return kept;
     }
-    // Récupère le pixel (r,g,b) aux coords (x,y)
-    function getPixel(data, x, y, w){
-      const idx= (y* w + x)*4;
-      return [data[idx], data[idx+1], data[idx+2]];
+    function applyRectSel(pixels,fullData,w,h, rx0,ry0,rx1,ry1){
+      const res=[];
+      let idx=0;
+      for(let y=0;y<h;y++){
+        for(let x=0;x<w;x++){
+          if(idx>=pixels.length) break;
+          const p= pixels[idx];
+          if(x>=rx0 && x<=rx1 && y>=ry0 && y<=ry1){
+            res.push(p);
+          }
+          idx++;
+        }
+      }
+      return res;
     }
-
-    // K-means, etc. inchangés
-    function drawColorWheel(canvas, colorData) {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0, canvas.width, canvas.height);
-
-      const cx= canvas.width/2;
-      const cy= canvas.height/2;
-      const radius= 120;
-      let startAngle=0;
-
-      const labelPositions=[];
-
-      colorData.forEach(cd=>{
-        const angleSpan= cd.proportion* 2*Math.PI;
-        const endAngle= startAngle+ angleSpan;
-
-        // arc
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle= `rgb(${cd.r}, ${cd.g}, ${cd.b})`;
-        ctx.fill();
-
-        const midAngle= (startAngle+ endAngle)/2;
-        startAngle= endAngle;
-
-        // trait
-        const lineStart= radius*0.8;
-        const lineEnd= radius+30; 
-        const sx= cx+ lineStart*Math.cos(midAngle);
-        const sy= cy+ lineStart*Math.sin(midAngle);
-        const ex= cx+ lineEnd*Math.cos(midAngle);
-        const ey= cy+ lineEnd*Math.sin(midAngle);
-
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(ex, ey);
-        ctx.strokeStyle='#000';
-        ctx.lineWidth=1;
-        ctx.stroke();
-
-        // 3 lignes => "R xx", "V yy", "B zz"
-        const lines= [
-          `R ${Math.round(cd.r)}`,
-          `V ${Math.round(cd.g)}`,
-          `B ${Math.round(cd.b)}`
-        ];
-
-        ctx.font= '8px Arial';
-        ctx.fillStyle='#000';
-        ctx.textAlign='center';
-
-        const labelDist= radius+60;
-        const lx= cx+ labelDist*Math.cos(midAngle);
-        const ly= cy+ labelDist*Math.sin(midAngle);
-
-        const lineHeight=10;
-        const totalH= lines.length* lineHeight;
-
-        let finalPos= avoidCollision(lx, ly, labelPositions, totalH);
-
-        let textY= finalPos.y;
-        lines.forEach(line=>{
-          ctx.fillText(line, finalPos.x, textY);
-          textY+= lineHeight;
+    function getPixelsAll(imgData,w,h){
+      const res=[];
+      for(let i=0;i<imgData.length;i+=4){
+        const r= imgData[i];
+        const g= imgData[i+1];
+        const b= imgData[i+2];
+        res.push([r,g,b]);
+      }
+      return res;
+    }
+    function getPixelsMask(imgData, maskData, w,h){
+      const res=[];
+      for(let i=0;i<imgData.length;i+=4){
+        const idx= i/4;
+        if(maskData[idx]===1){
+          const r= imgData[i];
+          const g= imgData[i+1];
+          const b= imgData[i+2];
+          res.push([r,g,b]);
+        }
+      }
+      return res;
+    }
+    function applyCenterWeight(pixels,w,h){
+      return pixels;
+    }
+    function kmeansPlus(data,k, runs=3, maxIter=20){
+      if(!data.length || k<1) return [];
+      let bestClusters=[];
+      let bestScore= Infinity;
+      for(let run=0; run<runs; run++){
+        let centers= initKmeansPlus(data,k);
+        const {clusters,sse}= runKmeans(data, centers, maxIter);
+        if(sse<bestScore){
+          bestScore=sse;
+          bestClusters= clusters;
+        }
+      }
+      return bestClusters;
+    }
+    function initKmeansPlus(data,k){
+      const centers=[];
+      let randIndex= Math.floor(Math.random()* data.length);
+      centers.push([...data[randIndex]]);
+      while(centers.length<k){
+        let dists= data.map(p=>{
+          let minD= distanceSq3(p, centers[0]);
+          for(let c=1;c<centers.length;c++){
+            const dd= distanceSq3(p, centers[c]);
+            if(dd<minD) minD= dd;
+          }
+          return minD;
         });
-
-        labelPositions.push({
-          x: finalPos.x,
-          y: finalPos.y,
-          w: 0,
-          h: totalH
-        });
-      });
+        let sumDist= dists.reduce((a,c)=>a+c,0);
+        let r= Math.random()* sumDist;
+        let idx=0;
+        for(let i=0;i<dists.length;i++){
+          r-= dists[i];
+          if(r<=0){ idx=i; break;}
+        }
+        centers.push([...data[idx]]);
+      }
+      return centers;
     }
-    function avoidCollision(x, y, existing, h){
-      let safeY= y;
-      let foundCollision= true;
-      while(foundCollision){
-        foundCollision= false;
-        for(let lb of existing){
-          let dist= Math.sqrt((x- lb.x)**2+ (safeY- lb.y)**2);
-          if(dist<20){
-            foundCollision= true;
-            safeY+=5;
-            break;
+    function runKmeans(data, initCenters, maxIter=20){
+      const k= initCenters.length;
+      let centers= initCenters.map(c=> [c[0],c[1],c[2]]);
+      let assigns= new Array(data.length).fill(-1);
+
+      let changed=true; let iter=0;
+      while(changed && iter<maxIter){
+        changed=false; iter++;
+        for(let i=0;i<data.length;i++){
+          let best=0;
+          let bestDist= distanceSq3(data[i], centers[0]);
+          for(let c=1;c<k;c++){
+            let dist= distanceSq3(data[i], centers[c]);
+            if(dist< bestDist){
+              bestDist= dist; best=c;
+            }
+          }
+          if(assigns[i]!==best){
+            assigns[i]=best;
+            changed=true;
+          }
+        }
+        const sums= new Array(k).fill(null).map(()=>[0,0,0]);
+        const counts= new Array(k).fill(0);
+        for(let i=0;i<data.length;i++){
+          const c= assigns[i];
+          sums[c][0]+= data[i][0];
+          sums[c][1]+= data[i][1];
+          sums[c][2]+= data[i][2];
+          counts[c]++;
+        }
+        for(let c=0;c<k;c++){
+          if(counts[c]>0){
+            centers[c][0]= sums[c][0]/ counts[c];
+            centers[c][1]= sums[c][1]/ counts[c];
+            centers[c][2]= sums[c][2]/ counts[c];
           }
         }
       }
-      return { x, y: safeY };
+      let sse=0;
+      const clusterArray=[];
+      for(let c=0;c<k;c++){
+        clusterArray.push({ center:[centers[c][0], centers[c][1], centers[c][2]], points:[] });
+      }
+      for(let i=0;i<data.length;i++){
+        const c= assigns[i];
+        const dist= distanceSq3(data[i], centers[c]);
+        sse+= dist;
+        clusterArray[c].points.push(data[i]);
+      }
+      return { clusters: clusterArray, sse };
+    }
+    function distanceSq3(px,ctr){
+      const dx= px[0]-ctr[0];
+      const dy= px[1]-ctr[1];
+      const dz= px[2]-ctr[2];
+      return dx*dx + dy*dy + dz*dz;
     }
 
-    // Ajout historique => identique
-    function addToHistory(fileName, palette) {
+    function addToHistory(fileName, palette){
       const itemDiv= document.createElement('div');
       itemDiv.classList.add('history-item');
 
@@ -674,142 +754,191 @@
       }
     }
 
-    function getPixelsAll(imgData, w, h) {
-      const res=[];
-      for(let i=0; i<imgData.length; i+=4){
-        const r= imgData[i];
-        const g= imgData[i+1];
-        const b= imgData[i+2];
-        res.push([r,g,b]);
-      }
-      return res;
-    }
-    function getPixelsMask(imgData, maskData, w, h) {
-      const res=[];
-      for(let i=0; i<imgData.length; i+=4){
-        const idx= i/4;
-        if(maskData[idx]===1){
-          const r= imgData[i];
-          const g= imgData[i+1];
-          const b= imgData[i+2];
-          res.push([r,g,b]);
-        }
-      }
-      return res;
-    }
-    function applyCenterWeight(pixels, w, h){
-      return pixels;
-    }
+    function drawColorWheel(canvas, colorData){
+      const ctx= canvas.getContext('2d');
+      ctx.clearRect(0,0, canvas.width, canvas.height);
 
-    // K-means inchangé
-    function kmeansPlus(data, k, runs=3, maxIter=20){
-      if(data.length===0|| k<1) return [];
-      let bestClusters=[];
-      let bestScore=Infinity;
-      for(let run=0; run<runs; run++){
-        let centers= initKmeansPlus(data,k);
-        const {clusters,sse}= runKmeans(data, centers, maxIter);
-        if(sse<bestScore){
-          bestScore=sse;
-          bestClusters= clusters;
-        }
-      }
-      return bestClusters;
-    }
-    function initKmeansPlus(data,k){
-      const centers=[];
-      let randIndex= Math.floor(Math.random()*data.length);
-      centers.push([...data[randIndex]]);
-      while(centers.length<k){
-        let dists= data.map(p=>{
-          let minD= distanceSq3(p,centers[0]);
-          for(let c=1;c<centers.length;c++){
-            const dd= distanceSq3(p,centers[c]);
-            if(dd<minD) minD= dd;
-          }
-          return minD;
+      const cx= canvas.width/2;
+      const cy= canvas.height/2;
+      const radius=120;
+      let startAngle=0;
+
+      const labelPositions=[];
+
+      colorData.forEach(cd=>{
+        const angleSpan= cd.proportion* 2*Math.PI;
+        const endAngle= startAngle+ angleSpan;
+
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy, radius, startAngle,endAngle);
+        ctx.closePath();
+        ctx.fillStyle= `rgb(${cd.r}, ${cd.g}, ${cd.b})`;
+        ctx.fill();
+
+        const midAngle= (startAngle+ endAngle)/2;
+        startAngle= endAngle;
+
+        const lineStart= radius*0.8;
+        const lineEnd= radius+30;
+        const sx= cx+ lineStart*Math.cos(midAngle);
+        const sy= cy+ lineStart*Math.sin(midAngle);
+        const ex= cx+ lineEnd*Math.cos(midAngle);
+        const ey= cy+ lineEnd*Math.sin(midAngle);
+
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.strokeStyle='#000';
+        ctx.lineWidth=1;
+        ctx.stroke();
+
+        const lines=[
+          `R ${Math.round(cd.r)}`,
+          `V ${Math.round(cd.g)}`,
+          `B ${Math.round(cd.b)}`
+        ];
+        ctx.font='8px Arial';
+        ctx.fillStyle='#000';
+        ctx.textAlign='center';
+
+        const labelDist= radius+60;
+        const lx= cx+ labelDist*Math.cos(midAngle);
+        const ly= cy+ labelDist*Math.sin(midAngle);
+
+        const lineHeight=10;
+        const totalH= lines.length* lineHeight;
+
+        let finalPos= avoidCollision(lx, ly, labelPositions, totalH);
+        let textY= finalPos.y;
+        lines.forEach(line=>{
+          ctx.fillText(line, finalPos.x, textY);
+          textY+= lineHeight;
         });
-        let sumDist= dists.reduce((a,c)=>a+c,0);
-        let r= Math.random()*sumDist;
-        let idx=0;
-        for(let i=0; i<dists.length;i++){
-          r-= dists[i];
-          if(r<=0){ idx=i; break;}
-        }
-        centers.push([...data[idx]]);
-      }
-      return centers;
+        labelPositions.push({x: finalPos.x, y: finalPos.y, w:0, h:totalH});
+      });
     }
-    function runKmeans(data, initCenters, maxIter=20){
-      const k= initCenters.length;
-      let centers= initCenters.map(c=> [c[0],c[1],c[2]]);
-      let assigns= new Array(data.length).fill(-1);
-
-      let changed=true;
-      let iter=0;
-      while(changed && iter< maxIter){
-        changed=false;
-        iter++;
-        for(let i=0; i<data.length;i++){
-          let best=0;
-          let bestDist= distanceSq3(data[i], centers[0]);
-          for(let c=1;c<k;c++){
-            let dist= distanceSq3(data[i], centers[c]);
-            if(dist< bestDist){ bestDist= dist; best= c;}
-          }
-          if(assigns[i]!==best){
-            assigns[i]= best;
-            changed= true;
-          }
-        }
-        const sums= new Array(k).fill(null).map(()=> [0,0,0]);
-        const counts= new Array(k).fill(0);
-        for(let i=0;i<data.length;i++){
-          const c= assigns[i];
-          sums[c][0]+= data[i][0];
-          sums[c][1]+= data[i][1];
-          sums[c][2]+= data[i][2];
-          counts[c]++;
-        }
-        for(let c=0;c<k;c++){
-          if(counts[c]>0){
-            centers[c][0]= sums[c][0]/ counts[c];
-            centers[c][1]= sums[c][1]/ counts[c];
-            centers[c][2]= sums[c][2]/ counts[c];
+    function avoidCollision(x,y, existing,h){
+      let safeY= y;
+      let foundCollision= true;
+      while(foundCollision){
+        foundCollision= false;
+        for(let lb of existing){
+          const dist= Math.sqrt((x- lb.x)**2 + (safeY-lb.y)**2);
+          if(dist<20){
+            foundCollision= true;
+            safeY+=5;
+            break;
           }
         }
       }
-      let sse=0;
-      const clusterArray= [];
-      for(let c=0;c<k;c++){
-        clusterArray.push({ center:[ centers[c][0], centers[c][1], centers[c][2]], points:[] });
-      }
-      for(let i=0; i<data.length; i++){
-        const c= assigns[i];
-        const dist= distanceSq3(data[i], centers[c]);
-        sse+= dist;
-        clusterArray[c].points.push(data[i]);
-      }
-      return {clusters: clusterArray, sse};
-    }
-    function distanceSq3(px,ctr){
-      const dx= px[0]-ctr[0];
-      const dy= px[1]-ctr[1];
-      const dz= px[2]-ctr[2];
-      return dx*dx+ dy*dy+ dz*dz;
+      return { x, y: safeY };
     }
 
-    // PDF
+    reloadBtn.addEventListener('click', async ()=>{
+      loader.style.display='block';
+      // Attendre un micro-délai pour permettre l'affichage du loader
+      await new Promise(r => setTimeout(r, 0));
+
+      try {
+        photosContainer.innerHTML='';
+        historyContainer.innerHTML='';
+        for(let i=uploadedImages.length-1; i>=0; i--){
+          createPhotoBlock(uploadedImages[i].name, uploadedImages[i].dataURL);
+        }
+      } catch(e){
+        console.error("Erreur reload:", e);
+      } finally {
+        loader.style.display='none';
+      }
+    });
+    effacerBtn.addEventListener('click', ()=>{
+      photosContainer.innerHTML='';
+    });
+    pdfBtn.addEventListener('click', async ()=>{
+      loader.style.display='block';
+      // Attendre un micro-délai pour permettre l'affichage du loader
+      await new Promise(r => setTimeout(r, 0));
+
+      try {
+        await saveHistoryAsPDF();
+      } catch(e){
+        console.error("Erreur PDF:", e);
+      } finally {
+        loader.style.display='none';
+      }
+    });
+
+    // *** Seule modification demandée : ajouter la valeur RVB de chaque couleur dans le PDF ***
     async function saveHistoryAsPDF(){
-      const canvas= await html2canvas(historyContainer, {scale:2});
       const { jsPDF }= window.jspdf;
-      const pdf= new jsPDF('p','px','a4');
-      const pdfWidth= pdf.internal.pageSize.getWidth();
-      const ratio= canvas.height/ canvas.width;
-      const pdfHeight= pdfWidth* ratio;
-      const imgData= canvas.toDataURL('image/png');
-      pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
-      pdf.save('historique.pdf');
+      try {
+        // Capture du conteneur "historyContainer" en image
+        const canvas= await html2canvas(historyContainer,{ scale:2 });
+        const pdf= new jsPDF('p','px','a4');
+        const pdfWidth= pdf.internal.pageSize.getWidth();
+        const ratio= canvas.height/ canvas.width;
+        const pdfHeight= pdfWidth* ratio;
+        const imgData= canvas.toDataURL('image/png');
+
+        // On insère la capture en image
+        pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+
+        // Position de départ pour le texte en dessous de l'image
+        let yPos= pdfHeight + 20;
+        // Vérification de la hauteur disponible sur la page
+        const pageHeight= pdf.internal.pageSize.getHeight();
+
+        // On parcourt l'historique et on ajoute la valeur RVB de chaque couleur
+        const historyItems= document.querySelectorAll('.history-item');
+        pdf.setFontSize(10);
+
+        historyItems.forEach(item=>{
+          const fileName= item.querySelector('h4')?.textContent || 'Sans nom';
+          const colorDivs= item.querySelectorAll('.history-color');
+          
+          // Si on dépasse la page, on en crée une nouvelle
+          if(yPos > pageHeight - 40){
+            pdf.addPage();
+            yPos= 20;
+          }
+
+          pdf.text(`Fichier : ${fileName}`, 10, yPos);
+          yPos+= 14;
+          colorDivs.forEach(div=>{
+            // On récupère le "title" où sont stockées les valeurs RVB
+            const rgbText= div.title.replace(/\n/g, ' | ');
+            if(yPos > pageHeight - 20){
+              pdf.addPage();
+              yPos= 20;
+            }
+            pdf.text(`- ${rgbText}`, 10, yPos);
+            yPos+= 14;
+          });
+          yPos+=10; 
+        });
+
+        pdf.save('historique.pdf');
+      } catch(e){
+        console.error("Erreur saveHistoryAsPDF:", e);
+      }
+    }
+
+    function avoidCollision(x,y,existing,h){
+      let safeY= y;
+      let foundCollision= true;
+      while(foundCollision){
+        foundCollision= false;
+        for(let lb of existing){
+          let dist= Math.sqrt((x-lb.x)**2 + (safeY-lb.y)**2);
+          if(dist<20){
+            foundCollision= true;
+            safeY+=5;
+            break;
+          }
+        }
+      }
+      return {x,y: safeY};
     }
   </script>
 </body>
